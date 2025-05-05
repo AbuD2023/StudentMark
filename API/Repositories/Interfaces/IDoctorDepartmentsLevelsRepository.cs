@@ -8,6 +8,7 @@ namespace API.Repositories.Interfaces
         Task<IEnumerable<DoctorDepartmentsLevels>> GetByDepartmentAsync(int departmentId);
         Task<IEnumerable<DoctorDepartmentsLevels>> GetByLevelAsync(int levelId);
         Task<IEnumerable<DoctorDepartmentsLevels>> GetActiveAssignmentsAsync();
+        Task<IEnumerable<DoctorDepartmentsLevels>> GetAllDoctorAsync();
         Task<bool> IsAssignmentUniqueAsync(int doctorId, int departmentId, int levelId);
     }
 }

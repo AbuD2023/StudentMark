@@ -12,9 +12,9 @@ class LectureSchedule {
   final int doctorId;
   final int departmentId;
   final int levelId;
-  final int dayOfWeek;
-  final String startTime;
-  final String endTime;
+  final int dayOfWeek; // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  final String startTime; // Format: "HH:mm:ss"
+  final String endTime; // Format: "HH:mm:ss"
   final String room;
   final bool isActive;
   // final DateTime createdAt;
@@ -59,8 +59,8 @@ class LectureSchedule {
       dayOfWeek: json['dayOfWeek'] as int,
       startTime: json['startTime'] as String,
       endTime: json['endTime'] as String,
-      isActive: json['isActive'] as bool,
       room: json['room'] as String,
+      isActive: json['isActive'] as bool,
       // createdAt: DateTime.parse(json['createdAt'] as String),
       // updatedAt: json['updatedAt'] != null
       //     ? DateTime.parse(json['updatedAt'] as String)
@@ -94,10 +94,10 @@ class LectureSchedule {
       'dayOfWeek': dayOfWeek,
       'startTime': startTime,
       'endTime': endTime,
-      'isActive': isActive,
       'room': room,
       // 'createdAt': createdAt.toIso8601String(),
       // 'updatedAt': updatedAt?.toIso8601String(),
+      'isActive': isActive,
       'courseSubject': courseSubject?.toJson(),
       'doctor': doctor?.toJson(),
       'department': department?.toJson(),
@@ -105,5 +105,43 @@ class LectureSchedule {
       'qrCodes': qrCodes?.map((e) => e.toJson()).toList(),
       'attendances': attendances?.map((e) => e.toJson()).toList(),
     };
+  }
+
+  LectureSchedule copyWith({
+    int? id,
+    int? courseSubjectId,
+    int? doctorId,
+    int? departmentId,
+    int? levelId,
+    int? dayOfWeek,
+    String? startTime,
+    String? endTime,
+    String? room,
+    bool? isActive,
+    CourseSubject? courseSubject,
+    User? doctor,
+    Department? department,
+    Level? level,
+    List<QRCode>? qrCodes,
+    List<Attendance>? attendances,
+  }) {
+    return LectureSchedule(
+      id: id ?? this.id,
+      courseSubjectId: courseSubjectId ?? this.courseSubjectId,
+      doctorId: doctorId ?? this.doctorId,
+      departmentId: departmentId ?? this.departmentId,
+      levelId: levelId ?? this.levelId,
+      dayOfWeek: dayOfWeek ?? this.dayOfWeek,
+      startTime: startTime ?? this.startTime,
+      endTime: endTime ?? this.endTime,
+      room: room ?? this.room,
+      isActive: isActive ?? this.isActive,
+      courseSubject: courseSubject ?? this.courseSubject,
+      doctor: doctor ?? this.doctor,
+      department: department ?? this.department,
+      level: level ?? this.level,
+      qrCodes: qrCodes ?? this.qrCodes,
+      attendances: attendances ?? this.attendances,
+    );
   }
 }

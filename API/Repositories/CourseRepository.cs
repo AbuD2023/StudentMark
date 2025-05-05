@@ -53,6 +53,8 @@ namespace API.Repositories
                 .Include(c => c.CourseSubjects)
                     .ThenInclude(cs => cs.Subject)
                 .Include(c => c.Department)
+                    .ThenInclude(cs => cs.LectureSchedules)
+                .Include(c => c.LectureSchedules)
                 .Where(c => c.CourseSubjects.Any(cs => cs.LevelId == levelId))
                 .ToListAsync();
         }

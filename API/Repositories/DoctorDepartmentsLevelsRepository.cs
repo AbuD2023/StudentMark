@@ -47,6 +47,15 @@ namespace API.Repositories
                 .Where(ddl => ddl.IsActive)
                 .ToListAsync();
         }
+        
+        public async Task<IEnumerable<DoctorDepartmentsLevels>> GetAllDoctorAsync()
+        {
+            return await _dbSet
+                .Include(ddl => ddl.Doctor)
+                .Include(ddl => ddl.Department)
+                .Include(ddl => ddl.Level)
+                .ToListAsync();
+        }
 
         public async Task<bool> IsAssignmentUniqueAsync(int doctorId, int departmentId, int levelId)
         {

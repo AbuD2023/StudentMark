@@ -4,10 +4,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace API.Entities
 {
     [Table("CourseSubjects")]
-    public class CourseSubject : BaseEntity
+    public class CourseSubject 
     {
-        // [Key]
-        // public int CourseSubjectId { get; set; }
+         [Key]
+        public int Id { get; set; }
 
         [Required]
         public int CourseId { get; set; }
@@ -23,14 +23,14 @@ namespace API.Entities
 
         // Navigation Properties
         [ForeignKey("CourseId")]
-        public Course Course { get; set; }
+        public Course? Course { get; set; }
 
         [ForeignKey("SubjectId")]
-        public Subject Subject { get; set; }
+        public Subject? Subject { get; set; }
 
         [ForeignKey("LevelId")]
-        public Level Level { get; set; }
+        public Level? Level { get; set; }
 
-        public ICollection<LectureSchedule> LectureSchedules { get; set; }
+        public ICollection<LectureSchedule>? LectureSchedules { get; set; }
     }
 }

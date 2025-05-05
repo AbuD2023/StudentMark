@@ -50,11 +50,12 @@ class CourseSubject {
           ? core.Subject.fromJson(json['subject'])
           : null,
       level: json['level'] != null ? core.Level.fromJson(json['level']) : null,
-      lectureSchedules: json['lectureSchedules'] != null
-          ? (json['lectureSchedules'] as List)
-              .map((e) => LectureSchedule.fromJson(e))
-              .toList()
-          : null,
+      lectureSchedules:
+          json['lectureSchedules'] != null && (json['attendances'] is List)
+              ? (json['attendances'] as List)
+                  .map((e) => LectureSchedule.fromJson(e))
+                  .toList()
+              : null,
     );
   }
 

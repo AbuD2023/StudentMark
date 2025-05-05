@@ -22,7 +22,7 @@ namespace API.Controllers
         [Authorize(Roles = "Admin,Coordinator")]
         public async Task<ActionResult<IEnumerable<DoctorDepartmentsLevels>>> GetDoctorAssignments()
         {
-            var assignments = await _doctorService.GetAllAsync();
+            var assignments = await _doctorService.GetAllDoctorAsync();
             return Ok(assignments);
         }
 

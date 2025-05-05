@@ -15,6 +15,8 @@ import 'package:coordinator_dashpord_for_studentmark/features/students/presentat
 import 'package:coordinator_dashpord_for_studentmark/features/departments/presentation/screens/departments_management_screen.dart';
 
 import 'features/levels/presentation/screens/levels_management_screen.dart';
+import 'features/subjects/presentation/screens/subjects_management_screen.dart';
+import 'package:coordinator_dashpord_for_studentmark/features/lecture_schedules/presentation/screens/lecture_schedules_management_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -80,6 +82,12 @@ class MyApp extends StatelessWidget {
                 coordinatorService: coordinatorService,
               ),
           '/levels': (context) => LevelsManagementScreen(
+                coordinatorService: coordinatorService,
+              ),
+          '/subjects': (context) => SubjectsManagementScreen(
+                coordinatorService: coordinatorService,
+              ),
+          '/lecture-schedules': (context) => LectureSchedulesManagementScreen(
                 coordinatorService: coordinatorService,
               ),
           // Add other routes here

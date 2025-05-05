@@ -30,7 +30,7 @@ namespace API.Controllers
         [Authorize(Roles = "Admin,Coordinator")]
         public async Task<ActionResult<IEnumerable<LectureSchedule>>> GetSchedules()
         {
-            var schedules = await _scheduleService.GetAllAsync();
+            var schedules = await _scheduleService.GetAllSchedulesAsync();
             return Ok(schedules);
         }
 

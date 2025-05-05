@@ -24,7 +24,7 @@ namespace API.Controllers
         }
 
         [HttpPost("register")]
-        [Authorize(Roles = "AcademicCoordinator")]
+        [Authorize(Roles = "Admin,Coordinator")]
         public async Task<IActionResult> Register([FromBody] RegisterDto model)
         {
             try
@@ -113,7 +113,7 @@ namespace API.Controllers
         //}
 
         [HttpGet]
-        [Authorize(Roles = "AcademicCoordinator")]
+        [Authorize(Roles = "Admin,Coordinator")]
         public async Task<IActionResult> GetUsers()
         {
             var users = await _userService.GetAllAsync();

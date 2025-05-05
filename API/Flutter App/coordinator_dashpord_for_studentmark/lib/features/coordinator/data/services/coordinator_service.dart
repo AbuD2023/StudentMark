@@ -11,6 +11,7 @@ import 'package:coordinator_dashpord_for_studentmark/core/models/subject.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../../config/constants.dart';
+import '../../../../core/models/user.dart';
 import '../../../departments/domain/models/department_model.dart';
 
 class CoordinatorService {
@@ -387,7 +388,7 @@ class CoordinatorService {
   // Course Operations
   Future<List<Course>> getAllCourses() async {
     try {
-      final response = await _dio.get('$baseUrl/api/courses');
+      final response = await _dio.get('$baseUrl/api/course');
       return (response.data as List)
           .map((json) => Course.fromJson(json))
           .toList();
@@ -536,7 +537,7 @@ class CoordinatorService {
 
   // Doctor Operations
   Future<List<DoctorDepartmentsLevels>> getAllDoctorAssignments() async {
-    final Response response = await _dio.get('$baseUrl/api/doctors');
+    final Response response = await _dio.get('$baseUrl/api/doctor');
     return (response.data as List)
         .map((json) => DoctorDepartmentsLevels.fromJson(json))
         .toList();
@@ -606,6 +607,7 @@ class CoordinatorService {
   Future<List<LectureSchedule>> getAllSchedules() async {
     try {
       final response = await _dio.get('$baseUrl/api/lectureSchedule');
+      // log(response.data.toString());
       return (response.data as List)
           .map((json) => LectureSchedule.fromJson(json))
           .toList();
@@ -871,4 +873,72 @@ class CoordinatorService {
         await _dio.get('$baseUrl/api/reports/student/$studentId');
     return response.data;
   }
+
+  // User Operations
+  Future<List<User>> getAllUsers() async {
+    try {
+      final response = await _dio.get('$baseUrl/api/users');
+      return (response.data as List)
+          .map((json) => User.fromJson(json))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to load users');
+    }
+  }
+
+  Future<List<User>> getActiveUsers() async {
+    try {
+      final response = await _dio.get('$baseUrl/api/users/active');
+      return (response.data as List)
+          .map((json) => User.fromJson(json))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to load active users');
+    }
+  }
+
+  Future<User> getUserById(int id) async {
+    try {
+      final response = await _dio.get('$baseUrl/api/users/$id');
+      return User.fromJson(response.data);
+    } catch (e) {
+      throw Exception('Failed to load user');
+    }
+  }
+
+  Future<void> createUser(User user) async {
+    try {
+      await _dio.post('$baseUrl/api/users/register', data: {
+        'fullName': user.fullName,
+        'email': user.email,
+        'username': user.username,
+        'password': user.password,
+        'roleId': user.roleId,
+      });
+    } catch (e) {
+      throw Exception('Failed to create user');
+    }
+  }
+
+  Future<void> updateUser(User user) async {
+    try {
+      await _dio.put('$baseUrl/api/users/${user.id}', data: {
+        'fullName': user.fullName,
+        'email': user.email,
+        'username': user.username,
+      });
+    } catch (e) {
+      throw Exception('Failed to update user');
+    }
+  }
+
+  Future<void> toggleUserStatus(int id) async {
+    try {
+      await _dio.put('$baseUrl/api/users/$id/toggle-status');
+    } catch (e) {
+      throw Exception('Failed to toggle user status');
+    }
+  }
+
+  // ... existing code ...
 }

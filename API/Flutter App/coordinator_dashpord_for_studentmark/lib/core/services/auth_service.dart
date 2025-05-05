@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/user.dart';
 import 'api_service.dart';
@@ -19,6 +21,7 @@ class AuthService {
           'password': password,
         },
       );
+      log(response.data['user'].toString());
       if (response.statusCode == 200) {
         final token = response.data['token'];
         final user = User.fromJson(response.data['user']);

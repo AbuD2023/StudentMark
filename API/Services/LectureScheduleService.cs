@@ -26,6 +26,11 @@ namespace API.Services
         {
             return await _lectureScheduleRepository.GetSchedulesByDoctorAsync(doctorId);
         }
+        
+        public async Task<IEnumerable<LectureSchedule>> GetAllSchedulesAsync()
+        {
+            return await _lectureScheduleRepository.GetAllSchedulesAsync();
+        }
 
         public async Task<IEnumerable<LectureSchedule>> GetSchedulesByCourseSubjectAsync(int courseSubjectId)
         {

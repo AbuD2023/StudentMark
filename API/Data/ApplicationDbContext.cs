@@ -33,8 +33,10 @@ namespace API.Data
             modelBuilder.Entity<RolePermission>()
                 .HasKey(rp => new { rp.RoleId, rp.PermissionId });
 
+            //modelBuilder.Entity<DoctorDepartmentsLevels>()
+            //    .HasKey(ddl => ddl.Id);
             modelBuilder.Entity<DoctorDepartmentsLevels>()
-                .HasKey(ddl => new { ddl.DoctorId, ddl.DepartmentId, ddl.LevelId });
+                .HasIndex(ddl => new { ddl.Id, ddl.DoctorId, ddl.DepartmentId, ddl.LevelId });
 
             // Configure relationships with NO ACTION for delete behavior
             modelBuilder.Entity<User>()
@@ -179,6 +181,11 @@ namespace API.Data
             modelBuilder.Entity<QRCode>()
                 .HasIndex(q => q.QRCodeValue)
                 .IsUnique();
+            
+            //modelBuilder.Entity<DoctorDepartmentsLevels>()
+            //    .HasIndex(q => q.Id)
+            //    .IsCreatedOnline()
+            //    .IncludeProperties();
 
             modelBuilder.Entity<Attendance>()
                 .HasIndex(a => new { a.StudentId, a.ScheduleId, a.AttendanceDate })

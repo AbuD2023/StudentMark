@@ -11,6 +11,7 @@ namespace API.Repositories.Interfaces
         Task<IEnumerable<LectureSchedule>> GetSchedulesByLevelAsync(int levelId);
         Task<IEnumerable<LectureSchedule>> GetSchedulesByDateRangeAsync(DateTime startDate, DateTime endDate);
         Task<IEnumerable<LectureSchedule>> GetActiveSchedulesAsync();
+        Task<IEnumerable<LectureSchedule>> GetAllSchedulesAsync();
         Task<bool> IsTimeSlotAvailableAsync(int doctorId, DayOfWeek dayOfWeek, TimeSpan startTime, TimeSpan endTime);
     }
 }

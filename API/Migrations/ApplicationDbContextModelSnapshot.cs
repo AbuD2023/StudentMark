@@ -158,26 +158,33 @@ namespace API.Migrations
 
             modelBuilder.Entity("API.Entities.DoctorDepartmentsLevels", b =>
                 {
-                    b.Property<int>("DoctorId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("DepartmentId")
                         .HasColumnType("int");
 
-                    b.Property<int>("LevelId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Id")
+                    b.Property<int>("DoctorId")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.HasKey("DoctorId", "DepartmentId", "LevelId");
+                    b.Property<int>("LevelId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("DepartmentId");
 
+                    b.HasIndex("DoctorId");
+
                     b.HasIndex("LevelId");
+
+                    b.HasIndex("Id", "DoctorId", "DepartmentId", "LevelId");
 
                     b.ToTable("DoctorDepartmentsLevels");
                 });

@@ -143,14 +143,14 @@ namespace API.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     FullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    RefreshToken = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    RefreshToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Username = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    RefreshTokenExpiryTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    RefreshTokenExpiryTime = table.Column<DateTime>(type: "datetime2", nullable: true),
                     LastLoginAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     RoleId = table.Column<int>(type: "int", nullable: false)
                 },
@@ -199,15 +199,16 @@ namespace API.Migrations
                 name: "DoctorDepartmentsLevels",
                 columns: table => new
                 {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     DoctorId = table.Column<int>(type: "int", nullable: false),
                     DepartmentId = table.Column<int>(type: "int", nullable: false),
                     LevelId = table.Column<int>(type: "int", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    IsActive = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DoctorDepartmentsLevels", x => new { x.DoctorId, x.DepartmentId, x.LevelId });
+                    table.PrimaryKey("PK_DoctorDepartmentsLevels", x => x.Id);
                     table.ForeignKey(
                         name: "FK_DoctorDepartmentsLevels_Departments_DepartmentId",
                         column: x => x.DepartmentId,
@@ -423,6 +424,16 @@ namespace API.Migrations
                 name: "IX_DoctorDepartmentsLevels_DepartmentId",
                 table: "DoctorDepartmentsLevels",
                 column: "DepartmentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DoctorDepartmentsLevels_DoctorId",
+                table: "DoctorDepartmentsLevels",
+                column: "DoctorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DoctorDepartmentsLevels_Id_DoctorId_DepartmentId_LevelId",
+                table: "DoctorDepartmentsLevels",
+                columns: new[] { "Id", "DoctorId", "DepartmentId", "LevelId" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_DoctorDepartmentsLevels_LevelId",

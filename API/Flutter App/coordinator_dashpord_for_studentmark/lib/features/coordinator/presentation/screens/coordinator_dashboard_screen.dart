@@ -119,14 +119,16 @@ class _CoordinatorDashboardScreenState
               leading: const Icon(Icons.book),
               title: const Text('إدارة المواد'),
               onTap: () {
-                // TODO: Navigate to subjects management
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/subjects');
               },
             ),
             ListTile(
-              leading: const Icon(Icons.calendar_today),
-              title: const Text('إدارة الجداول'),
+              leading: const Icon(Icons.schedule),
+              title: const Text('إدارة الجداول الدراسية'),
               onTap: () {
-                // TODO: Navigate to schedules management
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/lecture-schedules');
               },
             ),
             ListTile(
@@ -220,7 +222,7 @@ class _CoordinatorDashboardScreenState
                               title: 'إضافة طالب',
                               icon: Icons.person_add,
                               onPressed: () {
-                                // TODO: Navigate to add student
+                                Navigator.pushNamed(context, '/students');
                               },
                               color: Colors.blue,
                             ),
@@ -228,7 +230,7 @@ class _CoordinatorDashboardScreenState
                               title: 'إضافة قسم',
                               icon: Icons.add_business,
                               onPressed: () {
-                                // TODO: Navigate to add department
+                                Navigator.pushNamed(context, '/departments');
                               },
                               color: Colors.green,
                             ),
@@ -236,7 +238,7 @@ class _CoordinatorDashboardScreenState
                               title: 'إضافة مستوى',
                               icon: Icons.add_circle,
                               onPressed: () {
-                                // TODO: Navigate to add level
+                                Navigator.pushNamed(context, '/levels');
                               },
                               color: Colors.orange,
                             ),
@@ -244,7 +246,7 @@ class _CoordinatorDashboardScreenState
                               title: 'إضافة مادة',
                               icon: Icons.add_box,
                               onPressed: () {
-                                // TODO: Navigate to add subject
+                                Navigator.pushNamed(context, '/subjects');
                               },
                               color: Colors.purple,
                             ),

@@ -35,6 +35,11 @@ namespace API.Services
         {
             return await _doctorDepartmentsLevelsRepository.GetActiveAssignmentsAsync();
         }
+        
+        public async Task<IEnumerable<DoctorDepartmentsLevels>> GetAllDoctorAsync()
+        {
+            return await _doctorDepartmentsLevelsRepository.GetAllDoctorAsync();
+        }
 
         public async Task<bool> IsAssignmentUniqueAsync(int doctorId, int departmentId, int levelId)
         {

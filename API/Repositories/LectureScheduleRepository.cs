@@ -91,6 +91,18 @@ namespace API.Repositories
                 .Include(s => s.Level)
                 .ToListAsync();
         }
+        public async Task<IEnumerable<LectureSchedule>> GetAllSchedulesAsync()
+        {
+            return await _context.LectureSchedules
+                .Include(s => s.CourseSubject)
+                    .ThenInclude(cs => cs.Course)
+                .Include(s => s.CourseSubject)
+                    .ThenInclude(cs => cs.Subject)
+                .Include(s => s.Doctor)
+                .Include(s => s.Department)
+                .Include(s => s.Level)
+                .ToListAsync();
+        }
 
         public async Task<bool> IsTimeSlotAvailableAsync(int doctorId, DayOfWeek dayOfWeek, TimeSpan startTime, TimeSpan endTime)
         {

@@ -212,6 +212,7 @@ namespace API.Data
             {
                 new DoctorDepartmentsLevels
                 {
+                    Id = 0,
                     DoctorId = users.First(u => u.Email == "doctor@example.com").Id,
                     DepartmentId = departments[0].Id,
                     LevelId = levels[0].Id,
