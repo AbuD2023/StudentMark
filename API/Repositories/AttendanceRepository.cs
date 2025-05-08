@@ -83,7 +83,15 @@ namespace API.Repositories
         {
             return await _dbSet
                 .Include(a => a.Student)
+                    .ThenInclude(q => q.User)
                 .Include(a => a.QRCode)
+                    .ThenInclude(q => q.LectureSchedule)
+                        .ThenInclude(ls => ls.CourseSubject)
+                            .ThenInclude(cs => cs.Course)
+                .Include(a => a.QRCode)
+                    .ThenInclude(q => q.LectureSchedule)
+                        .ThenInclude(ls => ls.CourseSubject)
+                            .ThenInclude(cs => cs.Subject)
                 .Where(a => a.QRCode.ScheduleId == scheduleId)
                 .ToListAsync();
         }
@@ -92,6 +100,7 @@ namespace API.Repositories
         {
             return await _dbSet
                 .Include(a => a.Student)
+                .ThenInclude(q => q.User)
                 .Include(a => a.QRCode)
                     .ThenInclude(q => q.LectureSchedule)
                         .ThenInclude(ls => ls.CourseSubject)
@@ -100,6 +109,8 @@ namespace API.Repositories
                     .ThenInclude(q => q.LectureSchedule)
                         .ThenInclude(ls => ls.CourseSubject)
                             .ThenInclude(cs => cs.Subject)
+                            .Include(a => a.LectureSchedule)
+.ThenInclude(q => q.Doctor)
                 .Where(a => a.QRCodeId == qrCodeId)
                 .ToListAsync();
         }
@@ -108,6 +119,7 @@ namespace API.Repositories
         {
             return await _dbSet
                 .Include(a => a.Student)
+                    .ThenInclude(q => q.User)
                 .Include(a => a.QRCode)
                     .ThenInclude(q => q.LectureSchedule)
                         .ThenInclude(ls => ls.CourseSubject)
@@ -116,6 +128,8 @@ namespace API.Repositories
                     .ThenInclude(q => q.LectureSchedule)
                         .ThenInclude(ls => ls.CourseSubject)
                             .ThenInclude(cs => cs.Subject)
+                    .Include(a => a.LectureSchedule)
+                    .ThenInclude(q => q.Doctor)
                 .Where(a => a.AttendanceDate >= startDate && a.AttendanceDate <= endDate)
                 .ToListAsync();
         }

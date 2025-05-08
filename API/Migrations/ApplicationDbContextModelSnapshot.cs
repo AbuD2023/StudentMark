@@ -67,7 +67,7 @@ namespace API.Migrations
                     b.HasIndex("StudentId", "ScheduleId", "AttendanceDate")
                         .IsUnique();
 
-                    b.ToTable("Attendances", (string)null);
+                    b.ToTable("Attendances");
                 });
 
             modelBuilder.Entity("API.Entities.Course", b =>
@@ -97,7 +97,7 @@ namespace API.Migrations
 
                     b.HasIndex("DepartmentId");
 
-                    b.ToTable("Courses", (string)null);
+                    b.ToTable("Courses");
                 });
 
             modelBuilder.Entity("API.Entities.CourseSubject", b =>
@@ -128,7 +128,7 @@ namespace API.Migrations
 
                     b.HasIndex("SubjectId");
 
-                    b.ToTable("CourseSubjects", (string)null);
+                    b.ToTable("CourseSubjects");
                 });
 
             modelBuilder.Entity("API.Entities.Department", b =>
@@ -153,7 +153,7 @@ namespace API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Departments", (string)null);
+                    b.ToTable("Departments");
                 });
 
             modelBuilder.Entity("API.Entities.DoctorDepartmentsLevels", b =>
@@ -186,7 +186,7 @@ namespace API.Migrations
 
                     b.HasIndex("Id", "DoctorId", "DepartmentId", "LevelId");
 
-                    b.ToTable("DoctorDepartmentsLevels", (string)null);
+                    b.ToTable("DoctorDepartmentsLevels");
                 });
 
             modelBuilder.Entity("API.Entities.LectureSchedule", b =>
@@ -246,7 +246,7 @@ namespace API.Migrations
 
                     b.HasIndex("SubjectId");
 
-                    b.ToTable("LectureSchedules", (string)null);
+                    b.ToTable("LectureSchedules");
                 });
 
             modelBuilder.Entity("API.Entities.Level", b =>
@@ -272,7 +272,7 @@ namespace API.Migrations
 
                     b.HasIndex("DepartmentId");
 
-                    b.ToTable("Levels", (string)null);
+                    b.ToTable("Levels");
                 });
 
             modelBuilder.Entity("API.Entities.Permission", b =>
@@ -300,7 +300,7 @@ namespace API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Permissions", (string)null);
+                    b.ToTable("Permissions");
                 });
 
             modelBuilder.Entity("API.Entities.QRCode", b =>
@@ -339,7 +339,7 @@ namespace API.Migrations
 
                     b.HasIndex("ScheduleId");
 
-                    b.ToTable("QRCodes", (string)null);
+                    b.ToTable("QRCodes");
                 });
 
             modelBuilder.Entity("API.Entities.Role", b =>
@@ -362,7 +362,7 @@ namespace API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Roles", (string)null);
+                    b.ToTable("Roles");
                 });
 
             modelBuilder.Entity("API.Entities.RolePermission", b =>
@@ -380,7 +380,7 @@ namespace API.Migrations
 
                     b.HasIndex("PermissionId");
 
-                    b.ToTable("RolePermissions", (string)null);
+                    b.ToTable("RolePermissions");
                 });
 
             modelBuilder.Entity("API.Entities.Student", b =>
@@ -415,7 +415,7 @@ namespace API.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Students", (string)null);
+                    b.ToTable("Students");
                 });
 
             modelBuilder.Entity("API.Entities.Subject", b =>
@@ -440,7 +440,7 @@ namespace API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Subjects", (string)null);
+                    b.ToTable("Subjects");
                 });
 
             modelBuilder.Entity("API.Entities.User", b =>
@@ -450,6 +450,12 @@ namespace API.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("Age")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -477,6 +483,12 @@ namespace API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("PhoneOne")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneTow")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("RefreshToken")
                         .HasColumnType("nvarchar(max)");
 
@@ -485,6 +497,9 @@ namespace API.Migrations
 
                     b.Property<int>("RoleId")
                         .HasColumnType("int");
+
+                    b.Property<bool?>("Sex")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Username")
                         .IsRequired()
@@ -497,7 +512,7 @@ namespace API.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("API.Entities.Attendance", b =>
@@ -598,9 +613,10 @@ namespace API.Migrations
 
             modelBuilder.Entity("API.Entities.LectureSchedule", b =>
                 {
-                    b.HasOne("API.Entities.Course", null)
+                    b.HasOne("API.Entities.Course", "Course")
                         .WithMany("LectureSchedules")
-                        .HasForeignKey("CourseId");
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("API.Entities.CourseSubject", "CourseSubject")
                         .WithMany("LectureSchedules")
@@ -626,9 +642,12 @@ namespace API.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("API.Entities.Subject", null)
+                    b.HasOne("API.Entities.Subject", "Subject")
                         .WithMany("LectureSchedules")
-                        .HasForeignKey("SubjectId");
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("Course");
 
                     b.Navigation("CourseSubject");
 
@@ -637,6 +656,8 @@ namespace API.Migrations
                     b.Navigation("Doctor");
 
                     b.Navigation("Level");
+
+                    b.Navigation("Subject");
                 });
 
             modelBuilder.Entity("API.Entities.Level", b =>

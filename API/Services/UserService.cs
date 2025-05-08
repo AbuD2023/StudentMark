@@ -160,7 +160,7 @@ namespace API.Services
         
         public async Task<IEnumerable<User>> GetUnassignedStudents()
         {
-            var allDoctors = await _userRepository.GetAllAsync();
+            var allDoctors = await _userRepository.GetAllUsersAsync();
             var assignedStudents= await _studentRepository.GetAllAsync();
 
             // Get all doctors with role ID 2 (Doctor role)

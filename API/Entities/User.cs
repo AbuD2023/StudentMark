@@ -17,6 +17,11 @@ namespace API.Entities
         public string PasswordHash { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
+        public string? PhoneOne { get; set; }
+        public string? PhoneTow { get; set; }
+        public int? Age { get; set; }
+        public string? Address { get; set; }
+        public bool? Sex { get; set; } = true;
 
         [Required]
         public bool IsActive { get; set; } = true;
