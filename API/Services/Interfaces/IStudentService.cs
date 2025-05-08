@@ -8,6 +8,7 @@ namespace API.Services.Interfaces
         Task<IEnumerable<Student>> GetStudentsByDepartmentAsync(int departmentId);
         Task<IEnumerable<Student>> GetStudentsByLevelAsync(int levelId);
         Task<IEnumerable<Student>> GetActiveStudentsAsync();
+        Task<IEnumerable<Student>> GetAllStudentAsync();
         Task<bool> IsEnrollmentYearValidAsync(int enrollmentYear);
         Task<IEnumerable<Attendance>> GetStudentAttendancesAsync(int studentId);
         Task<IEnumerable<LectureSchedule>> GetStudentSchedulesAsync(int studentId);

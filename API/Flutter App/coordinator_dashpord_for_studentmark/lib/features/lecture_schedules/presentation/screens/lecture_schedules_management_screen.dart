@@ -3,6 +3,10 @@ import 'package:coordinator_dashpord_for_studentmark/core/models/lecture_schedul
 import 'package:coordinator_dashpord_for_studentmark/features/coordinator/data/services/coordinator_service.dart';
 import 'package:coordinator_dashpord_for_studentmark/features/lecture_schedules/presentation/widgets/add_lecture_schedule_dialog.dart';
 import 'package:coordinator_dashpord_for_studentmark/features/lecture_schedules/presentation/widgets/edit_lecture_schedule_dialog.dart';
+import 'package:coordinator_dashpord_for_studentmark/features/lecture_schedules/presentation/widgets/schedule_filter_dialog.dart';
+import 'package:coordinator_dashpord_for_studentmark/features/lecture_schedules/presentation/screens/weekly_schedule_table_screen.dart';
+
+import '../../../../core/models/level.dart';
 
 class LectureSchedulesManagementScreen extends StatefulWidget {
   final CoordinatorService coordinatorService;
@@ -23,12 +27,26 @@ class _LectureSchedulesManagementScreenState
   bool _isLoading = true;
   String _error = '';
   bool _showActiveOnly = true;
+  String _viewMode = 'all'; // 'all', 'doctor', 'level'
+  int? _selectedDoctorId;
+  int? _selectedLevelId;
+  int? _selectedDepartmentId;
+  int? _selectedCourseSubjectId;
+  int? _selectedDayOfWeek;
+  DateTime? _startDate;
 
   @override
   void initState() {
     super.initState();
     _loadSchedules();
   }
+
+  bool get _hasFilters =>
+      _selectedDayOfWeek != null ||
+      _selectedDepartmentId != null ||
+      _selectedCourseSubjectId != null;
+
+  bool get _hasDateFilter => _startDate != null;
 
   Future<void> _loadSchedules() async {
     try {
@@ -37,9 +55,88 @@ class _LectureSchedulesManagementScreenState
         _error = '';
       });
 
-      final schedules = _showActiveOnly
-          ? await widget.coordinatorService.getActiveSchedules()
-          : await widget.coordinatorService.getAllSchedules();
+      List<LectureSchedule> schedules = [];
+
+      if (_hasFilters) {
+        // تصفية متقدمة
+        if (_selectedDoctorId != null) {
+          schedules =
+              await widget.coordinatorService.getFilteredSchedulesByDoctor(
+            _selectedDoctorId!,
+            departmentId: _selectedDepartmentId,
+            levelId: _selectedLevelId,
+            courseSubjectId: _selectedCourseSubjectId,
+            dayOfWeek: _selectedDayOfWeek,
+          );
+        } else if (_selectedLevelId != null) {
+          schedules =
+              await widget.coordinatorService.getFilteredSchedulesByLevel(
+            _selectedLevelId!,
+            departmentId: _selectedDepartmentId,
+            courseSubjectId: _selectedCourseSubjectId,
+            dayOfWeek: _selectedDayOfWeek,
+          );
+        } else {
+          // تصفية عامة
+          schedules = _showActiveOnly
+              ? await widget.coordinatorService.getActiveSchedules()
+              : await widget.coordinatorService.getAllSchedules();
+
+          // تطبيق التصفية محلياً
+          if (_selectedDepartmentId != null) {
+            schedules = schedules
+                .where((s) => s.departmentId == _selectedDepartmentId)
+                .toList();
+          }
+          if (_selectedCourseSubjectId != null) {
+            schedules = schedules
+                .where((s) => s.courseSubjectId == _selectedCourseSubjectId)
+                .toList();
+          }
+          if (_selectedDayOfWeek != null) {
+            schedules = schedules
+                .where((s) => s.dayOfWeek == _selectedDayOfWeek)
+                .toList();
+          }
+        }
+      } else if (_hasDateFilter) {
+        // تصفية حسب التاريخ
+        if (_selectedDoctorId != null) {
+          schedules = await widget.coordinatorService.getWeekSchedulesByDoctor(
+            _selectedDoctorId!,
+            startDate: _startDate,
+          );
+        } else if (_selectedLevelId != null) {
+          schedules = await widget.coordinatorService.getWeekSchedulesByLevel(
+            _selectedLevelId!,
+            startDate: _startDate,
+          );
+        } else {
+          schedules = _showActiveOnly
+              ? await widget.coordinatorService.getActiveSchedules()
+              : await widget.coordinatorService.getAllSchedules();
+        }
+      } else {
+        // تصفية بسيطة حسب المحاضر أو المستوى
+        switch (_viewMode) {
+          case 'doctor':
+            if (_selectedDoctorId != null) {
+              schedules = await widget.coordinatorService
+                  .getSchedulesByDoctor(_selectedDoctorId!);
+            }
+            break;
+          case 'level':
+            if (_selectedLevelId != null) {
+              schedules = await widget.coordinatorService
+                  .getSchedulesByLevel(_selectedLevelId!);
+            }
+            break;
+          default:
+            schedules = _showActiveOnly
+                ? await widget.coordinatorService.getActiveSchedules()
+                : await widget.coordinatorService.getAllSchedules();
+        }
+      }
 
       setState(() {
         _schedules = schedules;
@@ -50,6 +147,35 @@ class _LectureSchedulesManagementScreenState
         _error = e.toString();
         _isLoading = false;
       });
+    }
+  }
+
+  Future<void> _showFilterDialog() async {
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (context) => ScheduleFilterDialog(
+        coordinatorService: widget.coordinatorService,
+        viewMode: _viewMode,
+        selectedDoctorId: _selectedDoctorId,
+        selectedLevelId: _selectedLevelId,
+        selectedDepartmentId: _selectedDepartmentId,
+        selectedCourseSubjectId: _selectedCourseSubjectId,
+        selectedDayOfWeek: _selectedDayOfWeek,
+        startDate: _startDate,
+      ),
+    );
+
+    if (result != null) {
+      setState(() {
+        _viewMode = result['viewMode'] ?? _viewMode;
+        _selectedDoctorId = result['doctorId'];
+        _selectedLevelId = result['levelId'];
+        _selectedDepartmentId = result['departmentId'];
+        _selectedCourseSubjectId = result['courseSubjectId'];
+        _selectedDayOfWeek = result['dayOfWeek'];
+        _startDate = result['startDate'];
+      });
+      _loadSchedules();
     }
   }
 
@@ -114,14 +240,57 @@ class _LectureSchedulesManagementScreenState
     }
   }
 
+  String _getViewModeTitle() {
+    switch (_viewMode) {
+      case 'all':
+        return 'جميع الجداول';
+      case 'doctor':
+        return 'جداول المحاضر';
+      case 'level':
+        return 'جداول المستوى';
+      default:
+        return 'إدارة الجداول الدراسية';
+    }
+  }
+
+  void _showWeeklyTableDialog() async {
+    int? levelId = await showDialog<int>(
+      context: context,
+      builder: (context) =>
+          LevelSelectDialog(coordinatorService: widget.coordinatorService),
+    );
+    if (levelId != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => WeeklyScheduleTableScreen(
+            coordinatorService: widget.coordinatorService,
+            levelId: levelId,
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('إدارة الجداول الدراسية'),
+        title: Text(_getViewModeTitle()),
         actions: [
           IconButton(
-            icon: Icon(_showActiveOnly ? Icons.filter_list : Icons.filter_alt),
+            icon: const Icon(Icons.filter_list),
+            onPressed: _showFilterDialog,
+            tooltip: 'تصفية الجداول',
+          ),
+          IconButton(
+            icon: const Icon(Icons.table_chart),
+            tooltip: 'عرض الجدول الأسبوعي',
+            onPressed: _showWeeklyTableDialog,
+          ),
+          IconButton(
+            icon:
+                Icon(_showActiveOnly ? Icons.visibility : Icons.visibility_off),
             onPressed: () {
               setState(() {
                 _showActiveOnly = !_showActiveOnly;
@@ -157,11 +326,14 @@ class _LectureSchedulesManagementScreenState
                               ),
                               child: ListTile(
                                 title: Text(
-                                  '${schedule.courseSubject?.subject?.subjectName ?? 'غير معروف'} - ${schedule.department?.departmentName ?? 'غير معروف'}',
+                                  '${schedule.courseSubject?.subject?.subjectName ?? 'غير معروف'} - ${schedule.courseSubject?.subject?.description ?? 'غير معروف'}',
                                 ),
                                 subtitle: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
+                                    Text(
+                                      'القسم: ${schedule.department?.departmentName ?? 'غير معروف'}',
+                                    ),
                                     Text(
                                       'المستوى: ${schedule.level?.levelName ?? 'غير معروف'}',
                                     ),
@@ -173,6 +345,9 @@ class _LectureSchedulesManagementScreenState
                                     ),
                                     Text(
                                       'القاعة: ${schedule.room}',
+                                    ),
+                                    Text(
+                                      'الدكتور: ${schedule.doctor?.fullName ?? 'غير معروف'}',
                                     ),
                                   ],
                                 ),
@@ -203,6 +378,62 @@ class _LectureSchedulesManagementScreenState
         onPressed: _addSchedule,
         child: const Icon(Icons.add),
       ),
+    );
+  }
+}
+
+class LevelSelectDialog extends StatefulWidget {
+  final CoordinatorService coordinatorService;
+  const LevelSelectDialog({super.key, required this.coordinatorService});
+  @override
+  State<LevelSelectDialog> createState() => _LevelSelectDialogState();
+}
+
+class _LevelSelectDialogState extends State<LevelSelectDialog> {
+  int? _selectedLevelId;
+  List<Level> _levels = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.coordinatorService.getAllLevels().then((levels) {
+      setState(() {
+        _levels = levels;
+        _loading = false;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('اختر المستوى'),
+      content: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : DropdownButtonFormField<int>(
+              value: _selectedLevelId,
+              items: _levels
+                  .map((level) => DropdownMenuItem(
+                        value: level.id,
+                        child: Text(level.levelName),
+                      ))
+                  .toList(),
+              onChanged: (val) => setState(() => _selectedLevelId = val),
+              decoration: const InputDecoration(labelText: 'المستوى'),
+            ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('إلغاء'),
+        ),
+        ElevatedButton(
+          onPressed: _selectedLevelId == null
+              ? null
+              : () => Navigator.pop(context, _selectedLevelId),
+          child: const Text('عرض الجدول'),
+        ),
+      ],
     );
   }
 }

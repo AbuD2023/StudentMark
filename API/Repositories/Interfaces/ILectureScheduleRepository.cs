@@ -1,3 +1,4 @@
+using API.DTOs;
 using API.Entities;
 
 namespace API.Repositories.Interfaces
@@ -12,6 +13,7 @@ namespace API.Repositories.Interfaces
         Task<IEnumerable<LectureSchedule>> GetSchedulesByDateRangeAsync(DateTime startDate, DateTime endDate);
         Task<IEnumerable<LectureSchedule>> GetActiveSchedulesAsync();
         Task<IEnumerable<LectureSchedule>> GetAllSchedulesAsync();
+        Task<IEnumerable<RoomDto>> GetAllRoomsAsync();
         Task<bool> IsTimeSlotAvailableAsync(int doctorId, DayOfWeek dayOfWeek, TimeSpan startTime, TimeSpan endTime);
     }
 }

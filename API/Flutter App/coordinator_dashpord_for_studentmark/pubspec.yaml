@@ -58,6 +58,8 @@ dependencies:
   fluttertoast: 
   # Responsive
   responsive_framework: ^1.5.1
+  flutter_localizations:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:

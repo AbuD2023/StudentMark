@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:coordinator_dashpord_for_studentmark/core/models/course.dart';
 import 'package:coordinator_dashpord_for_studentmark/core/models/course_subject.dart';
 import 'package:coordinator_dashpord_for_studentmark/core/models/doctor_departments_levels.dart';
@@ -8,6 +6,9 @@ import 'package:coordinator_dashpord_for_studentmark/features/departments/domain
 import 'package:flutter/material.dart';
 import 'package:coordinator_dashpord_for_studentmark/core/models/lecture_schedule.dart';
 import 'package:coordinator_dashpord_for_studentmark/features/coordinator/data/services/coordinator_service.dart';
+import 'package:intl/intl.dart' as intl;
+
+import '../../../../core/models/user.dart';
 
 class EditLectureScheduleDialog extends StatefulWidget {
   final CoordinatorService coordinatorService;
@@ -33,20 +34,24 @@ class _EditLectureScheduleDialogState extends State<EditLectureScheduleDialog> {
   late int _selectedLevelId;
   late int _selectedCourseSubjectId;
   late int _selectedDoctorId;
-  final _roomController = TextEditingController();
+  String? _selectedRoom;
 
   List<Department> _departments = [];
   List<Level> _levels = [];
   List<CourseSubject> _courseSubjects = [];
   List<Course> _courses = [];
-  List<DoctorDepartmentsLevels> _doctors = [];
-
+  List<User> _doctors = [];
+  List<Map<String, dynamic>>? _rooms;
+  final _roomController = TextEditingController();
   bool _isLoading = true;
+  bool _isLoadingRooms = true;
+  bool _showRoomInput = false;
   String _error = '';
 
   @override
   void initState() {
     super.initState();
+    _loadRooms();
     _initializeData();
   }
 
@@ -56,60 +61,93 @@ class _EditLectureScheduleDialogState extends State<EditLectureScheduleDialog> {
     super.dispose();
   }
 
+  void _loadRooms() async {
+    try {
+      final rooms = await widget.coordinatorService.getAllScheduleRooms();
+      final roomsMap = <String, Map<String, dynamic>>{};
+
+      if (rooms.isNotEmpty) {
+        for (var room in rooms) {
+          roomsMap[room['room']] = {
+            'id': room['id'].toString(),
+            'name': room['room'],
+          };
+        }
+      }
+
+      setState(() {
+        _rooms = roomsMap.values.toList();
+        if (widget.schedule.room.isNotEmpty) {
+          // Find the room with matching name
+          final matchingRoom = _rooms?.firstWhere(
+            (room) => room['name'] == widget.schedule.room,
+            orElse: () =>
+                {'id': widget.schedule.room, 'name': widget.schedule.room},
+          );
+          if (matchingRoom != null) {
+            _selectedRoom = matchingRoom['name'] as String;
+          }
+        } else if (_rooms!.isNotEmpty && _selectedRoom == null) {
+          _selectedRoom = _rooms!.first['name'] as String;
+        }
+        _isLoadingRooms = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+        _isLoadingRooms = false;
+      });
+    }
+  }
+
   Future<void> _initializeData() async {
-    // try {
-    setState(() {
-      _isLoading = true;
-      _error = '';
-    });
+    try {
+      setState(() {
+        _isLoading = true;
+        _error = '';
+      });
 
-    // Initialize form fields with schedule data
-    _selectedDayOfWeek = widget.schedule.dayOfWeek;
-    final startTimeParts = widget.schedule.startTime.split(':');
-    _selectedStartTime = TimeOfDay(
-      hour: int.parse(startTimeParts[0]),
-      minute: int.parse(startTimeParts[1]),
-    );
-    final endTimeParts = widget.schedule.endTime.split(':');
-    _selectedEndTime = TimeOfDay(
-      hour: int.parse(endTimeParts[0]),
-      minute: int.parse(endTimeParts[1]),
-    );
-    _selectedDepartmentId = widget.schedule.departmentId;
-    _selectedLevelId = widget.schedule.levelId;
-    _selectedCourseSubjectId = widget.schedule.courseSubjectId;
-    _selectedDoctorId = widget.schedule.doctorId;
-    _roomController.text = widget.schedule.room;
+      // Initialize form fields with schedule data
+      _selectedDayOfWeek = widget.schedule.dayOfWeek;
+      final startTimeParts = widget.schedule.startTime.split(':');
+      _selectedStartTime = TimeOfDay(
+        hour: int.parse(startTimeParts[0]),
+        minute: int.parse(startTimeParts[1]),
+      );
+      final endTimeParts = widget.schedule.endTime.split(':');
+      _selectedEndTime = TimeOfDay(
+        hour: int.parse(endTimeParts[0]),
+        minute: int.parse(endTimeParts[1]),
+      );
+      _selectedDepartmentId = widget.schedule.departmentId;
+      _selectedLevelId = widget.schedule.levelId;
+      _selectedCourseSubjectId = widget.schedule.courseSubjectId;
+      _selectedDoctorId = widget.schedule.doctorId;
+      _selectedRoom = widget.schedule.room;
 
-    // Load departments
-    final departments = await widget.coordinatorService.getAllDepartments();
-    _departments = departments;
+      // Load departments
+      final departments = await widget.coordinatorService.getAllDepartments();
+      _departments = departments;
 
-    // Load doctors
-    final doctors = await widget.coordinatorService.getAllDoctorAssignments();
-    _doctors = doctors;
-    // _doctors.forEach(
-    //   (element) {
-    //     log(element.toJson().toString());
-    //   },
-    // );
-    // _doctors.add(doctors.first);
+      // Load doctors
+      final doctors = await widget.coordinatorService.getDoctorsUsersAsync();
+      _doctors = doctors.toSet().toList();
 
-    // Load levels for selected department
-    await _loadLevels(_selectedDepartmentId);
+      // Load levels for selected department
+      await _loadLevels(_selectedDepartmentId);
 
-    // Load course subjects for selected level
-    await _loadCourseSubjects(_selectedLevelId);
+      // Load course subjects for selected level
+      await _loadCourseSubjects(_selectedLevelId);
 
-    setState(() {
-      _isLoading = false;
-    });
-    // } catch (e) {
-    //   setState(() {
-    //     _error = e.toString();
-    //     _isLoading = false;
-    //   });
-    // }
+      setState(() {
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _loadLevels(int departmentId) async {
@@ -131,7 +169,7 @@ class _EditLectureScheduleDialogState extends State<EditLectureScheduleDialog> {
       final courses = await widget.coordinatorService.getLevelCourses(levelId);
       setState(() {
         _courses = courses;
-        _courseSubjects = []; // Clear previous subjects
+        _courseSubjects = [];
       });
 
       for (var course in _courses) {
@@ -184,6 +222,15 @@ class _EditLectureScheduleDialogState extends State<EditLectureScheduleDialog> {
     if (!_formKey.currentState!.validate()) return;
 
     try {
+      final roomValue = _showRoomInput ? _roomController.text : _selectedRoom;
+      if (roomValue == null || roomValue.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('الرجاء إدخال أو اختيار القاعة الدراسية')),
+        );
+        return;
+      }
+
       final updatedSchedule = LectureSchedule(
         id: widget.schedule.id,
         courseSubjectId: _selectedCourseSubjectId,
@@ -195,7 +242,7 @@ class _EditLectureScheduleDialogState extends State<EditLectureScheduleDialog> {
             '${_selectedStartTime.hour.toString().padLeft(2, '0')}:${_selectedStartTime.minute.toString().padLeft(2, '0')}:00',
         endTime:
             '${_selectedEndTime.hour.toString().padLeft(2, '0')}:${_selectedEndTime.minute.toString().padLeft(2, '0')}:00',
-        room: _roomController.text,
+        room: roomValue,
         isActive: widget.schedule.isActive,
       );
 
@@ -279,13 +326,21 @@ class _EditLectureScheduleDialogState extends State<EditLectureScheduleDialog> {
                             Expanded(
                               child: TextButton(
                                 onPressed: () => _selectStartTime(context),
-                                child: Text(_selectedStartTime.format(context)),
+                                child: Text(intl.DateFormat('HH:mm').format(
+                                    DateTime(
+                                        2025,
+                                        1,
+                                        1,
+                                        _selectedStartTime.hour,
+                                        _selectedStartTime.minute))),
                               ),
                             ),
                             Expanded(
                               child: TextButton(
                                 onPressed: () => _selectEndTime(context),
-                                child: Text(_selectedEndTime.format(context)),
+                                child: Text(intl.DateFormat('HH:mm').format(
+                                    DateTime(2025, 1, 1, _selectedEndTime.hour,
+                                        _selectedEndTime.minute))),
                               ),
                             ),
                           ],
@@ -298,7 +353,7 @@ class _EditLectureScheduleDialogState extends State<EditLectureScheduleDialog> {
                           ),
                           items: _departments
                               .map((d) => DropdownMenuItem(
-                                    value: d.id as int,
+                                    value: d.id,
                                     child: Text(d.departmentName),
                                   ))
                               .toList(),
@@ -323,7 +378,7 @@ class _EditLectureScheduleDialogState extends State<EditLectureScheduleDialog> {
                           ),
                           items: _levels
                               .map((l) => DropdownMenuItem(
-                                    value: l.id as int,
+                                    value: l.id,
                                     child: Text(l.levelName),
                                   ))
                               .toList(),
@@ -374,7 +429,7 @@ class _EditLectureScheduleDialogState extends State<EditLectureScheduleDialog> {
                           items: _doctors
                               .map((d) => DropdownMenuItem(
                                     value: d.id,
-                                    child: Text(d.doctor?.fullName as String),
+                                    child: Text(d.fullName ?? 'غير معروف'),
                                   ))
                               .toList(),
                           onChanged: (value) {
@@ -390,18 +445,71 @@ class _EditLectureScheduleDialogState extends State<EditLectureScheduleDialog> {
                           },
                         ),
                         const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _roomController,
-                          decoration: const InputDecoration(
-                            labelText: 'القاعة',
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'الرجاء إدخال اسم القاعة';
-                            }
-                            return null;
-                          },
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _showRoomInput = !_showRoomInput;
+                                    if (!_showRoomInput) {
+                                      _roomController.clear();
+                                    }
+                                  });
+                                },
+                                child: Text(_showRoomInput
+                                    ? 'اختيار قاعة'
+                                    : 'إضافة قاعة جديدة'),
+                              ),
+                            ),
+                          ],
                         ),
+                        const SizedBox(height: 16),
+                        if (_isLoadingRooms)
+                          const Center(child: CircularProgressIndicator())
+                        else if (_showRoomInput)
+                          TextFormField(
+                            controller: _roomController,
+                            decoration: const InputDecoration(
+                              labelText: 'اسم القاعة الجديدة',
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'الرجاء إدخال اسم القاعة';
+                              }
+                              return null;
+                            },
+                            onChanged: (value) {
+                              setState(() {
+                                _selectedRoom = value;
+                              });
+                            },
+                          )
+                        else
+                          DropdownButtonFormField<String>(
+                            value: _selectedRoom,
+                            decoration: const InputDecoration(
+                              labelText: 'القاعة الدراسية',
+                            ),
+                            items: _rooms
+                                ?.map((room) => DropdownMenuItem<String>(
+                                      value: room['name'] as String,
+                                      child: Text(room['name'] ?? 'غير معروف'),
+                                    ))
+                                .toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                _selectedRoom = value;
+                                _roomController.clear();
+                              });
+                            },
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'الرجاء اختيار القاعة الدراسية';
+                              }
+                              return null;
+                            },
+                          ),
                       ],
                     ),
                   ),

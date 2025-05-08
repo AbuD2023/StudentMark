@@ -6,21 +6,21 @@ import 'package:coordinator_dashpord_for_studentmark/core/models/role.dart';
 import 'package:coordinator_dashpord_for_studentmark/core/models/student.dart';
 
 class User {
-  final int id;
-  final String fullName;
+  final int? id;
+  final String? fullName;
   final String? refreshToken;
-  final String username;
-  final String passwordHash;
-  final String email;
-  final String password;
-  final bool isActive;
-  final DateTime createdAt;
+  final String? username;
+  final String? passwordHash;
+  final String? email;
+  final String? password;
+  final bool? isActive;
+  final DateTime? createdAt;
   final DateTime? refreshTokenExpiryTime;
   final DateTime? lastLoginAt;
   final DateTime? updatedAt;
 
   // Navigation properties
-  final int roleId;
+  final int? roleId;
   final Role? role;
   final Student? student;
   final List<LectureSchedule>? lectureSchedules;
@@ -29,19 +29,19 @@ class User {
   final List<Attendance>? attendances;
 
   User({
-    required this.id,
-    required this.fullName,
+     this.id,
+    this.fullName,
     this.refreshToken,
-    required this.username,
-    required this.passwordHash,
-    required this.email,
-    required this.password,
-    required this.isActive,
-    required this.createdAt,
+    this.username,
+    this.passwordHash,
+    this.email,
+    this.password,
+    this.isActive,
+    this.createdAt,
     this.refreshTokenExpiryTime,
     this.lastLoginAt,
     this.updatedAt,
-    required this.roleId,
+    this.roleId,
     this.role,
     this.student,
     this.lectureSchedules,
@@ -53,14 +53,18 @@ class User {
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'] as int,
-      fullName: json['fullName'] as String,
-      refreshToken: json['refreshToken'] as String?,
-      username: json['username'] as String,
-      passwordHash: json['passwordHash'] as String,
-      email: json['email'] as String,
-      password: json['password'] as String,
-      isActive: json['isActive'] as bool,
-      createdAt: DateTime.parse(json['createdAt'] as String),
+      fullName: json['fullName'] != null ? json['fullName'] as String : null,
+      refreshToken:
+          json['refreshToken'] != null ? json['refreshToken'] as String : null,
+      username: json['username'] != null ? json['username'] as String : null,
+      passwordHash:
+          json['passwordHash'] != null ? json['passwordHash'] as String : null,
+      email: json['email'] != null ? json['email'] as String : null,
+      password: json['password'] != null ? json['password'] as String : null,
+      isActive: json['isActive'] != null ? json['isActive'] as bool : null,
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
+          : null,
       refreshTokenExpiryTime: json['refreshTokenExpiryTime'] != null
           ? DateTime.parse(json['refreshTokenExpiryTime'] as String)
           : null,
@@ -107,7 +111,7 @@ class User {
       'email': email,
       'password': password,
       'isActive': isActive,
-      'createdAt': createdAt.toIso8601String(),
+      'createdAt': createdAt?.toIso8601String(),
       'refreshTokenExpiryTime': refreshTokenExpiryTime?.toIso8601String(),
       'lastLoginAt': lastLoginAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),

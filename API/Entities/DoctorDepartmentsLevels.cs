@@ -25,12 +25,12 @@ namespace API.Entities
 
         // Navigation Properties
         [ForeignKey("DoctorId")]
-        public User Doctor { get; set; }
+        public User? Doctor { get; set; }
 
         [ForeignKey("DepartmentId")]
-        public Department Department { get; set; }
+        public Department? Department { get; set; }
 
         [ForeignKey("LevelId")]
-        public Level Level { get; set; }
+        public Level? Level { get; set; }
     }
 }

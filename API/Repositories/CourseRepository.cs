@@ -16,6 +16,8 @@ namespace API.Repositories
             return await _dbSet
                 .Include(c => c.CourseSubjects)
                     .ThenInclude(cs => cs.Subject)
+                .Include(c => c.CourseSubjects)
+                    .ThenInclude(cs => cs.Level)
                 .Include(c => c.Department)
                 .Where(c => c.DepartmentId == departmentId)
                 .ToListAsync();
@@ -26,8 +28,20 @@ namespace API.Repositories
             return await _dbSet
                 .Include(c => c.CourseSubjects)
                     .ThenInclude(cs => cs.Subject)
+                .Include(c => c.CourseSubjects)
+                    .ThenInclude(cs => cs.Level)
                 .Include(c => c.Department)
                 .FirstOrDefaultAsync(c => c.Id == courseId);
+        }
+        public async Task<IEnumerable<Course>> GetAllCoursesAsync()
+        {
+            return await _dbSet
+                .Include(c => c.CourseSubjects)
+                    .ThenInclude(cs => cs.Subject)
+                .Include(c => c.CourseSubjects)
+                    .ThenInclude(cs => cs.Level)
+                .Include(c => c.Department)
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<Course>> GetActiveCoursesAsync()
@@ -35,6 +49,8 @@ namespace API.Repositories
             return await _dbSet
                 .Include(c => c.CourseSubjects)
                     .ThenInclude(cs => cs.Subject)
+                .Include(c => c.CourseSubjects)
+                    .ThenInclude(cs => cs.Level)
                 .Include(c => c.Department)
                 .Where(c => c.IsActive)
                 .ToListAsync();

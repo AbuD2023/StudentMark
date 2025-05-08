@@ -14,12 +14,15 @@ namespace API.Repositories
         
         public virtual async Task<IEnumerable<Level>> GetAllAsyncCopy()
         {
-            return await _dbSet.Include(le=> le.Department).ToListAsync();
+            return await _dbSet
+                .Include(le=> le.Department)
+                .ThenInclude(le=> le.LectureSchedules)
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<Level>> GetLevelsByDepartmentAsync(int departmentId)
         {
-            return await _dbSet.Where(l => l.DepartmentId == departmentId).ToListAsync();
+            return await _dbSet.Where(l => l.DepartmentId == departmentId).Include(l=> l.Department).ToListAsync();
         }
 
         public async Task<IEnumerable<Level>> GetActiveLevelsAsync()

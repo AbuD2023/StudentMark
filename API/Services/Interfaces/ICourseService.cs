@@ -11,5 +11,6 @@ namespace API.Services.Interfaces
         Task<IEnumerable<Subject>> GetCourseSubjectsAsync(int courseId);
         Task<bool> AddSubjectToCourseAsync(int courseId, int subjectId, int levelId);
         Task<bool> RemoveSubjectFromCourseAsync(int courseId, int subjectId, int levelId);
+        Task<IEnumerable<Course>> GetAllCoursesAsync();
     }
 }

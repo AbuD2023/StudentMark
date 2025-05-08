@@ -23,7 +23,7 @@ namespace API.Controllers
         [Authorize(Roles = "Admin,Coordinator")]
         public async Task<ActionResult<IEnumerable<Student>>> GetStudents()
         {
-            var students = await _studentService.GetAllAsync();
+            var students = await _studentService.GetAllStudentAsync();
             return Ok(students);
         }
 

@@ -269,5 +269,20 @@ namespace API.Controllers
 
             return Ok(report);
         }
+
+        [HttpGet("today")]
+        [Authorize(Roles = "Student")]
+        public async Task<IActionResult> GetAttendancesByTodayAsync()
+        {
+            var userId = HttpContext.GetUserId();
+            var student = await _studentService.GetStudentWithUserAsync(userId);
+            if (student == null )
+            {
+                return Forbid();
+            }
+
+            var attendances = await _attendanceService.GetAttendancesByTodayAsync();
+            return Ok(attendances.OrderByDescending(a => a.AttendanceDate));
+        }
     }
 }

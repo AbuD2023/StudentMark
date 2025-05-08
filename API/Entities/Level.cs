@@ -22,14 +22,14 @@ namespace API.Entities
 
         // Navigation Properties
         [ForeignKey("DepartmentId")]
-        public Department Department { get; set; }
+        public Department? Department { get; set; }
 
-        public ICollection<Student> Students { get; set; }
+        public ICollection<Student>? Students { get; set; }
 
-        public ICollection<CourseSubject> CourseSubjects { get; set; }
+        public ICollection<CourseSubject>? CourseSubjects { get; set; }
 
-        public ICollection<DoctorDepartmentsLevels> DoctorDepartmentsLevels { get; set; }
+        public ICollection<DoctorDepartmentsLevels>? DoctorDepartmentsLevels { get; set; }
 
-        public ICollection<LectureSchedule> LectureSchedules { get; set; }
+        public ICollection<LectureSchedule>? LectureSchedules { get; set; }
     }
 }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../config/constants.dart';
+
 class QuickActionButton extends StatelessWidget {
   final String title;
   final IconData icon;
@@ -28,18 +30,28 @@ class QuickActionButton extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            size: 32,
-            color: Colors.white,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            style: const TextStyle(
+          Flexible(
+            child: Icon(
+              icon,
+              size: MediaQuery.of(context).size.width <=
+                      AppConstants.mobileBreakpoint
+                  ? 24
+                  : 32,
               color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
+            ),
+          ),
+          // const SizedBox(height: 8),
+          Flexible(
+            child: Text(
+              title,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: MediaQuery.of(context).size.width <=
+                        AppConstants.mobileBreakpoint
+                    ? 12
+                    : 16,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],

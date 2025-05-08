@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class AppConstants {
   // API Base URL
   static const String baseUrl = 'http://192.168.137.1:7275/api';
@@ -39,4 +41,9 @@ class AppConstants {
 
   // Animation Durations
   static const Duration defaultAnimationDuration = Duration(milliseconds: 300);
+
+  static const supportedLocales = [
+    Locale('en', 'US'),
+    Locale('ar', 'AR'),
+  ];
 }

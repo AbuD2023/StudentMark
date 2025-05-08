@@ -5,12 +5,12 @@ import 'package:coordinator_dashpord_for_studentmark/core/models/user.dart';
 import '../../features/departments/domain/models/department_model.dart';
 
 class Student {
-  final int? id;
-  final int userId;
-  final int departmentId;
-  final int levelId;
-  final int enrollmentYear;
-  final bool isActive;
+  int? id;
+  int? userId;
+  int? departmentId;
+  int? levelId;
+  int? enrollmentYear;
+  bool? isActive;
   // final DateTime createdAt;
   // final DateTime? updatedAt;
 
@@ -22,11 +22,11 @@ class Student {
 
   Student({
     this.id,
-    required this.userId,
-    required this.departmentId,
-    required this.levelId,
-    required this.enrollmentYear,
-    required this.isActive,
+    this.userId,
+    this.departmentId,
+    this.levelId,
+    this.enrollmentYear,
+    this.isActive,
     // required this.createdAt,
     // this.updatedAt,
     this.user,

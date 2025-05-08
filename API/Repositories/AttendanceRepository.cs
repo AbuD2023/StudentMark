@@ -26,6 +26,58 @@ namespace API.Repositories
                 .Where(a => a.StudentId == studentId)
                 .ToListAsync();
         }
+        
+        public async Task<IEnumerable<Attendance>> GetAttendancesByDoctorAsync(int doctorId)
+        {
+            return await _dbSet
+                .Include(a => a.Student)
+                    .ThenInclude(q => q.User)
+                .Include(a => a.QRCode)
+                    .ThenInclude(q => q.LectureSchedule)
+                        .ThenInclude(ls => ls.CourseSubject)
+                            .ThenInclude(cs => cs.Course)
+                .Include(a => a.QRCode)
+                    .ThenInclude(q => q.LectureSchedule)
+                        .ThenInclude(ls => ls.CourseSubject)
+                            .ThenInclude(cs => cs.Subject)
+                .Include(a => a.LectureSchedule)
+                    .ThenInclude(q => q.Doctor)
+                //.Include(a => a.LectureSchedule)
+                //    .ThenInclude(ls => ls.CourseSubject)
+                //            .ThenInclude(cs => cs.Course)
+                .Include(a => a.LectureSchedule)
+                    .ThenInclude(ls => ls.Department)
+                .Include(a => a.LectureSchedule)
+                    .ThenInclude(ls => ls.Level)
+                .Where(a => a.LectureSchedule.Doctor.Id == doctorId)
+                .ToListAsync();
+        }
+        
+        public async Task<IEnumerable<Attendance>> GetAttendancesByTodayAsync(DateTime todayDate)
+        {
+            return await _dbSet
+                .Include(a => a.Student)
+                    .ThenInclude(q => q.User)
+                .Include(a => a.QRCode)
+                    .ThenInclude(q => q.LectureSchedule)
+                        .ThenInclude(ls => ls.CourseSubject)
+                            .ThenInclude(cs => cs.Course)
+                .Include(a => a.QRCode)
+                    .ThenInclude(q => q.LectureSchedule)
+                        .ThenInclude(ls => ls.CourseSubject)
+                            .ThenInclude(cs => cs.Subject)
+                .Include(a => a.LectureSchedule)
+                    .ThenInclude(q => q.Doctor)
+                //.Include(a => a.LectureSchedule)
+                //    .ThenInclude(ls => ls.CourseSubject)
+                //            .ThenInclude(cs => cs.Course)
+                .Include(a => a.LectureSchedule)
+                    .ThenInclude(ls => ls.Department)
+                .Include(a => a.LectureSchedule)
+                    .ThenInclude(ls => ls.Level)
+                .Where(a => a.AttendanceDate.Date == todayDate.Date)
+                .ToListAsync();
+        }
 
         public async Task<IEnumerable<Attendance>> GetAttendancesByScheduleAsync(int scheduleId)
         {

@@ -21,8 +21,8 @@ namespace API.Entities
         public bool IsActive { get; set; } = true;
 
         // Navigation Properties
-        public ICollection<CourseSubject> CourseSubjects { get; set; }
+        public ICollection<CourseSubject>? CourseSubjects { get; set; }
 
-        public ICollection<LectureSchedule> LectureSchedules { get; set; }
+        public ICollection<LectureSchedule>? LectureSchedules { get; set; }
     }
 }

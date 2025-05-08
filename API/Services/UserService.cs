@@ -1,21 +1,30 @@
 using API.Data;
 using API.Entities;
+using API.Repositories;
 using API.Repositories.Interfaces;
 using API.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace API.Services
 {
     public class UserService : GenericService<User>, IUserService
     {
         private readonly IUserRepository _userRepository;
+        private readonly IRoleRepository _roleRepository;
         private readonly ApplicationDbContext _context;
+        private readonly IDoctorDepartmentsLevelsRepository _doctorDepartmentsLevelsRepository;
+        private readonly IStudentRepository _studentRepository;
 
-        public UserService(IUserRepository userRepository, IUnitOfWork unitOfWork, ApplicationDbContext context)
+        public UserService(IUserRepository userRepository, IRoleRepository roleRepository, IUnitOfWork unitOfWork, ApplicationDbContext context, IDoctorDepartmentsLevelsRepository doctorDepartmentsLevelsRepository, IStudentRepository studentRepository)
             : base(userRepository, unitOfWork)
         {
             _userRepository = userRepository;
+            _roleRepository = roleRepository;
             _context = context;
+            _doctorDepartmentsLevelsRepository = doctorDepartmentsLevelsRepository;
+            _studentRepository = studentRepository;
+
         }
 
         public async Task<User> GetUserWithRoleAsync(string username)
@@ -40,14 +49,35 @@ namespace API.Services
         {
             return await _userRepository.GetActiveUsersAsync();
         }
+        
+        public async Task<IEnumerable<User>> GetAllUsersAsync()
+        {
+            return await _userRepository.GetAllUsersAsync();
+        }
 
-        public async Task<bool> UpdateUserStatusAsync(int userId, bool isActive)
+        public async Task<IEnumerable<User>> GetDoctorUsersAsync()
+        {
+            var rool = await _roleRepository.GetAllAsync();
+            //int doctorRoolId = rool.Where(ro => ro.Name == "Doctor").Select(ro=> ro.Id).First();
+            var doctorRole = rool.First(r => r.Name == "Doctor");
+            return await _userRepository.GetUsersByRoleIdAsync(doctorRole.Id);
+        }
+        
+        public async Task<IEnumerable<User>> GetStudentsUsersAsync()
+        {
+            var rool = await _roleRepository.GetAllAsync();
+            //int doctorRoolId = rool.Where(ro => ro.Name == "Doctor").Select(ro=> ro.Id).First();
+            var doctorRole = rool.First(r => r.Name == "Student");
+            return (await _userRepository.GetUsersByRoleIdAsync(doctorRole.Id));
+        }
+
+        public async Task<bool> UpdateUserStatusAsync(int userId)
         {
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
                 throw new Exception("User not found");
 
-            user.IsActive = isActive;
+            user.IsActive = !user.IsActive;
             _userRepository.Update(user);
             await _unitOfWork.SaveChangesAsync();
             return true;
@@ -109,6 +139,40 @@ namespace API.Services
             // Implement token validation logic here
             // This is a placeholder implementation
             return !string.IsNullOrEmpty(token);
+        }
+
+        public async Task<IEnumerable<User>> GetUnassignedDoctors()
+        {
+            var allDoctors = await _userRepository.GetAllAsync();
+            var assignedDoctors = await _doctorDepartmentsLevelsRepository.GetAllAsync();
+
+            // Get all doctors with role ID 2 (Doctor role)
+            var rool = await _roleRepository.GetAllAsync();
+            var doctorRole = rool.First(r => r.Name == "Doctor");
+            var doctors = allDoctors.Where(u => u.RoleId == doctorRole.Id);
+
+            // Get IDs of assigned doctors
+            var assignedDoctorIds = assignedDoctors.Select(d => d.DoctorId).Distinct();
+
+            // Return doctors that are not assigned to any department/level
+            return doctors.Where(d => !assignedDoctorIds.Contains(d.Id))/*.ToList()*/;
+        }
+        
+        public async Task<IEnumerable<User>> GetUnassignedStudents()
+        {
+            var allDoctors = await _userRepository.GetAllAsync();
+            var assignedStudents= await _studentRepository.GetAllAsync();
+
+            // Get all doctors with role ID 2 (Doctor role)
+            var rool = await _roleRepository.GetAllAsync();
+            var studentRole = rool.First(r => r.Name == "Student");
+            var students = allDoctors.Where(u => u.RoleId == studentRole.Id);
+
+            // Get IDs of assigned doctors
+            var assignedStudentIds= assignedStudents.Select(d => d.UserId).Distinct();
+
+            // Return doctors that are not assigned to any department/level
+            return students.Where(d => !assignedStudentIds.Contains(d.Id))/*.ToList()*/;
         }
     }
 }

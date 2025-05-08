@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using API.DTOs.Auth;
 using API.Entities;
+using API.Services;
 
 namespace API.Controllers
 {
@@ -116,8 +117,102 @@ namespace API.Controllers
         [Authorize(Roles = "Admin,Coordinator")]
         public async Task<IActionResult> GetUsers()
         {
-            var users = await _userService.GetAllAsync();
+            var users = await _userService.GetAllUsersAsync();
             return Ok(users);
+        }
+        
+        [HttpGet("{userId}")]
+        [Authorize(Roles = "Admin,Coordinator")]
+        public async Task<IActionResult> GetByIdAsync(int userId)
+        {
+            var users = await _userService.GetByIdAsync(userId);
+            return Ok(users);
+        }
+        [HttpGet("doctorUser")]
+        [Authorize(Roles = "Admin,Coordinator")]
+        public async Task<IActionResult> GetDoctorUsersAsync()
+        {
+            var users = await _userService.GetDoctorUsersAsync();
+            return Ok(users);
+        }
+        
+        [HttpGet("studentUser")]
+        [Authorize(Roles = "Admin,Coordinator")]
+        public async Task<IActionResult> GetStudentsUsersAsync()
+        {
+            var users = await _userService.GetStudentsUsersAsync();
+            return Ok(users);
+        }
+
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Coordinator")]
+        public Task<IActionResult> UpdateAsync(int id, [FromBody] User user)
+        {
+            var users =  _userService.UpdateAsync(user);
+            return Task.FromResult<IActionResult>(Ok(users));
+        }
+        
+        [HttpPut("{id}/toggle-status")]
+        [Authorize(Roles = "Admin,Coordinator")]
+        public async Task<IActionResult> UpdateUserStatusAsync(int id)
+        {
+            //return Task.FromResult<IActionResult>(Ok(users));
+
+            var user = await _userService.GetByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound(new { message = "User not found" });
+            }
+
+            //user.IsActive = !user.IsActive;
+            //await _userService.UpdateUserStatusAsync(user.Id, !user.IsActive);
+            //var users =  _userService.UpdateAsync(user);
+            await  _userService.UpdateUserStatusAsync(id);
+            return NoContent();
+        }
+        
+        [HttpGet("active")]
+        [Authorize(Roles = "Admin,Coordinator")]
+        public async Task<IActionResult> GetActiveUsersAsync()
+        {
+            var users = await _userService.GetActiveUsersAsync();
+            return Ok(users);
+        }
+        
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin,Coordinator")]
+        public async Task<IActionResult> DeleteUserAsync(int id)
+        {
+            await _userService.DeleteAsync(id);
+            return NoContent();
+        }
+
+        [HttpGet("unassigned-doctors")]
+        public async Task<ActionResult<IEnumerable<User>>> GetUnassignedDoctors()
+        {
+            try
+            {
+                var unassignedDoctors = await _userService.GetUnassignedDoctors();
+                return Ok(unassignedDoctors);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+        
+        [HttpGet("unassigned-students")]
+        public async Task<ActionResult<IEnumerable<User>>> GetUnassignedStudents()
+        {
+            try
+            {
+                var unassignedStudents= await _userService.GetUnassignedStudents();
+                return Ok(unassignedStudents);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

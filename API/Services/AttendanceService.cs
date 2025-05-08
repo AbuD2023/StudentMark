@@ -41,6 +41,11 @@ namespace API.Services
         {
             return await _attendanceRepository.GetAttendancesByDateRangeAsync(startDate, endDate);
         }
+        
+        public async Task<IEnumerable<Attendance>> GetAttendancesByTodayAsync()
+        {
+            return await _attendanceRepository.GetAttendancesByTodayAsync(DateTime.Today);
+        }
 
         public async Task<bool> IsAttendanceUniqueAsync(int studentId, int scheduleId, DateTime attendanceDate)
         {

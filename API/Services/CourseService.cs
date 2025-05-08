@@ -26,6 +26,10 @@ namespace API.Services
         {
             return await _courseRepository.GetCoursesByDepartmentAsync(departmentId);
         }
+        public async Task<IEnumerable<Course>> GetAllCoursesAsync()
+        {
+            return await _courseRepository.GetAllCoursesAsync();
+        }
 
         public async Task<Course?> GetCourseWithSubjectsAsync(int courseId)
         {

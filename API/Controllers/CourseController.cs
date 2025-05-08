@@ -1,4 +1,4 @@
-using API.DTOs;
+﻿using API.DTOs;
 using API.Entities;
 using API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -21,7 +21,7 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Course>>> GetCourses()
         {
-            var courses = await _courseService.GetAllAsync();
+            var courses = await _courseService.GetAllCoursesAsync();
             return Ok(courses);
         }
 
@@ -115,7 +115,12 @@ namespace API.Controllers
             course.DepartmentId = courseDto.DepartmentId;
 
             await _courseService.UpdateAsync(course);
-            return NoContent();
+
+            return Ok(new
+            {
+                message = "تمت  الإضافة بنجاح"
+            });
+            //return NoContent();
         }
 
         [HttpPut("{id}/toggle-status")]

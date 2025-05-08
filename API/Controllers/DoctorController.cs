@@ -1,5 +1,7 @@
 using API.DTOs;
 using API.Entities;
+using API.Extensions;
+using API.Services;
 using API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,10 +14,13 @@ namespace API.Controllers
     public class DoctorController : ControllerBase
     {
         private readonly IDoctorDepartmentsLevelsService _doctorService;
+        private readonly IAttendanceService _attendanceService;
 
-        public DoctorController(IDoctorDepartmentsLevelsService doctorService)
+        public DoctorController(IDoctorDepartmentsLevelsService doctorService, IAttendanceService attendanceService)
         {
             _doctorService = doctorService;
+            _attendanceService = attendanceService;
+
         }
 
         [HttpGet]
@@ -90,7 +95,7 @@ namespace API.Controllers
                 DoctorId = doctorDto.DoctorId,
                 DepartmentId = doctorDto.DepartmentId,
                 LevelId = doctorDto.LevelId,
-                IsActive = true
+                IsActive = true,
             };
 
             await _doctorService.AddAsync(assignment);
@@ -158,6 +163,21 @@ namespace API.Controllers
 
             await _doctorService.DeleteAsync(id);
             return NoContent();
+        }
+
+        [HttpGet("attendances/today")]
+        [Authorize(Roles = "Admin,Coordinator,Doctor")]
+        public async Task<ActionResult<Attendance>> GetAttendancesByTodayAsync()
+        {
+            var userId = HttpContext.GetUserId();
+            var doctor = await _doctorService.GetByIdAsync(userId);
+            if (doctor == null)
+            {
+                return Forbid();
+            }
+
+            var attendances = await _attendanceService.GetAttendancesByTodayAsync();
+            return Ok(attendances.OrderByDescending(a => a.AttendanceDate));
         }
     }
 }

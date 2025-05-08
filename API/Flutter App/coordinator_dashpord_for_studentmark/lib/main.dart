@@ -1,3 +1,4 @@
+import 'package:coordinator_dashpord_for_studentmark/features/users/presentation/screens/users_management_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -14,12 +15,47 @@ import 'package:coordinator_dashpord_for_studentmark/features/students/presentat
 import 'package:coordinator_dashpord_for_studentmark/features/students/presentation/screens/student_attendance_screen.dart';
 import 'package:coordinator_dashpord_for_studentmark/features/departments/presentation/screens/departments_management_screen.dart';
 
+import 'features/doctors/domain/repositories/doctor_repository.dart';
 import 'features/levels/presentation/screens/levels_management_screen.dart';
 import 'features/subjects/presentation/screens/subjects_management_screen.dart';
 import 'package:coordinator_dashpord_for_studentmark/features/lecture_schedules/presentation/screens/lecture_schedules_management_screen.dart';
+import 'package:coordinator_dashpord_for_studentmark/features/courses/presentation/pages/courses_page.dart';
+import 'package:coordinator_dashpord_for_studentmark/features/doctors/data/repositories/doctor_repository_impl.dart';
+import 'package:coordinator_dashpord_for_studentmark/features/doctors/data/services/doctor_service.dart';
+import 'package:coordinator_dashpord_for_studentmark/features/doctors/presentation/providers/doctor_provider.dart';
+import 'package:coordinator_dashpord_for_studentmark/features/doctors/presentation/screens/doctors_management_screen.dart';
+
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        Provider(create: (_) => ApiService()),
+        Provider(
+            create: (_) =>
+                AuthService(ApiService(), const FlutterSecureStorage())),
+        Provider<DoctorService>(
+          create: (context) => DoctorService(
+            Dio(),
+            baseUrl: 'http://192.168.137.1:7275',
+          ),
+        ),
+        Provider<DoctorRepository>(
+          create: (context) => DoctorRepositoryImpl(
+            context.read<DoctorService>(),
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => DoctorProvider(
+            context.read<DoctorRepository>(),
+            context.read<DoctorService>(),
+          ),
+        ),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -50,20 +86,26 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: AppConstants.appName,
         debugShowCheckedModeBanner: false,
+        locale: const Locale('ar', 'AR'),
+        supportedLocales: AppConstants.supportedLocales,
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
         theme: AppTheme.lightTheme,
         builder: (context, child) => ResponsiveBreakpoints.builder(
           child: child!,
-          // maxWidth: 2460,
-          // minWidth: 450,
-          // defaultScale: true,
           breakpoints: AppTheme.responsiveBreakpoints,
-          // background: Container(color: const Color(0xFFF5F5F5)),
         ),
         home: CoordinatorDashboardScreen(
           coordinatorService: coordinatorService,
         ),
         routes: {
           '/login': (context) => const LoginScreen(),
+          '/user': (context) => UsersManagementScreen(
+                coordinatorService: coordinatorService,
+              ),
           '/dashboard': (context) => CoordinatorDashboardScreen(
                 coordinatorService: coordinatorService,
               ),
@@ -90,6 +132,10 @@ class MyApp extends StatelessWidget {
           '/lecture-schedules': (context) => LectureSchedulesManagementScreen(
                 coordinatorService: coordinatorService,
               ),
+          '/courses': (context) => CoursesPage(
+                coordinatorService: coordinatorService,
+              ),
+          '/doctors': (context) => const DoctorsManagementScreen(),
           // Add other routes here
         },
       ),

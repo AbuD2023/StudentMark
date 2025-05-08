@@ -13,11 +13,13 @@ namespace API.Controllers
     {
         private readonly IUserService _userService;
         private readonly IConfiguration _configuration;
+        private readonly IDoctorDepartmentsLevelsService _doctorDepartmentsLevelsService;
 
-        public AuthController(IUserService userService, IConfiguration configuration)
+        public AuthController(IUserService userService, IConfiguration configuration, IDoctorDepartmentsLevelsService doctorDepartmentsLevelsService)
         {
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            _doctorDepartmentsLevelsService = doctorDepartmentsLevelsService ?? throw new ArgumentNullException(nameof(doctorDepartmentsLevelsService));
         }
 
         [HttpPost("register")]
@@ -56,7 +58,20 @@ namespace API.Controllers
 
                 await _userService.AddAsync(user);
 
-                return Ok(new { message = "User registered successfully" });
+                //if(user.RoleId == 2)
+                //{
+                //    var doctorDepartmentsLevels = new DoctorDepartmentsLevels
+                //    {
+                //       DepartmentId = 0,
+                //       DoctorId = user.Id,
+                //       IsActive = true,
+                //       LevelId = 0
+                //    };
+
+                //    await _doctorDepartmentsLevelsService.AddAsync(doctorDepartmentsLevels);
+                //}
+
+                return Ok(new { message = "User registered successfully", id = user.Id });
             }
             catch (Exception ex)
             {

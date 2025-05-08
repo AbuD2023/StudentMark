@@ -25,5 +25,6 @@ namespace API.DTOs
 
         [Required]
         public TimeSpan EndTime { get; set; }
+        public string room { get; set; }
     }
 }

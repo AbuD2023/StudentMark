@@ -44,16 +44,16 @@ namespace API.Controllers
         [Authorize(Roles = "Admin,Coordinator,Doctor")]
         public async Task<IActionResult> GetAttendanceReportsByDoctor(int doctorId)
         {
-            if (User.IsInRole("Doctor"))
-            {
-                var userId = HttpContext.GetUserId();
-                if (doctorId != userId)
-                {
-                    return Forbid();
-                }
-            }
+            //if (User.IsInRole("Doctor") || User.IsInRole("Coordinator") || User.IsInRole("Admin"))
+            //{
+            //    var userId = HttpContext.GetUserId();
+            //    if (doctorId != userId)
+            //    {
+            //        return Forbid();
+            //    }
+            //}
 
-            var reports = await _attendanceReportService.GetAttendanceByDoctorAsync(doctorId);
+            var reports = await _attendanceReportService.GetAttendancesByDoctorAsync(doctorId);
             return Ok(reports);
         }
 

@@ -1,4 +1,4 @@
-using API.Entities;
+﻿using API.Entities;
 using Microsoft.EntityFrameworkCore;
 using BCrypt.Net;
 
@@ -95,21 +95,13 @@ namespace API.Data
             {
                 new Department { DepartmentName = "Computer Science", Description = "CS Department", IsActive = true },
                 new Department { DepartmentName = "Information Technology", Description = "IT Department", IsActive = true },
-                new Department { DepartmentName = "Software Engineering", Description = "SE Department", IsActive = true }
+                new Department { DepartmentName = "Software Engineering", Description = "SE Department", IsActive = true },
+                new Department { DepartmentName = "تقنية معلومات", Description = "قسم الـ IT", IsActive = true },
             };
             await context.Departments.AddRangeAsync(departments);
             await context.SaveChangesAsync();
 
-            // Create Levels
-            var levels = new List<Level>
-            {
-                new Level { LevelName = "First Year", DepartmentId = departments[0].Id, IsActive = true },
-                new Level { LevelName = "Second Year", DepartmentId = departments[0].Id, IsActive = true },
-                new Level { LevelName = "Third Year", DepartmentId = departments[0].Id, IsActive = true },
-                new Level { LevelName = "Fourth Year", DepartmentId = departments[0].Id, IsActive = true }
-            };
-            await context.Levels.AddRangeAsync(levels);
-            await context.SaveChangesAsync();
+            
 
             // Create Users (Admin, Doctor, Student)
             var users = new List<User>
@@ -128,22 +120,23 @@ namespace API.Data
                 },
                 new User
                 {
-                    Username = "coordinator",
-                    FullName = "Coordinator",
-                    Email = "coordinator@example.com",
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("Coordinator123!", BCrypt.Net.BCrypt.GenerateSalt(12)),
-                    Password= BCrypt.Net.BCrypt.HashPassword("Coordinator123!", BCrypt.Net.BCrypt.GenerateSalt(12)),
+                    Username = "hifa",
+                    FullName = "هيفا الحمادي",
+                    Email = "hifa@example.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("Hifa123!", BCrypt.Net.BCrypt.GenerateSalt(12)),
+                    Password= BCrypt.Net.BCrypt.HashPassword("Hifa123!", BCrypt.Net.BCrypt.GenerateSalt(12)),
                     RoleId = adminRole.Id,
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow
                 },
+               
                 new User
                 {
-                    Username = "doctor",
-                    FullName = "Doctor",
-                    Email = "doctor@example.com",
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("Doctor123!", BCrypt.Net.BCrypt.GenerateSalt(12)),
-                    Password= BCrypt.Net.BCrypt.HashPassword("Doctor123!", BCrypt.Net.BCrypt.GenerateSalt(12)),
+                    Username = "ebrahim",
+                    FullName = "إبراهيم البلطة",
+                    Email = "ebrahim@example.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("Ebrahim123!", BCrypt.Net.BCrypt.GenerateSalt(12)),
+                    Password= BCrypt.Net.BCrypt.HashPassword("Ebrahim123!", BCrypt.Net.BCrypt.GenerateSalt(12)),
                     RoleId = doctorRole.Id,
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow
@@ -151,11 +144,34 @@ namespace API.Data
                 },
                 new User
                 {
-                    Username = "student",
-                    Email = "student@example.com",
-                    FullName = "Student",
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("Student123!", BCrypt.Net.BCrypt.GenerateSalt(12)),
-                    Password= BCrypt.Net.BCrypt.HashPassword("Student123!", BCrypt.Net.BCrypt.GenerateSalt(12)),
+                    Username = "mohdAljodah",
+                    FullName = "محمد الجودة",
+                    Email = "mohdAljodah@example.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("MohdAljodah123!", BCrypt.Net.BCrypt.GenerateSalt(12)),
+                    Password= BCrypt.Net.BCrypt.HashPassword("MohdAljodah123!", BCrypt.Net.BCrypt.GenerateSalt(12)),
+                    RoleId = doctorRole.Id,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow
+
+                },
+                new User
+                {
+                    Username = "mohmdAlsnbany",
+                    Email = "mohmdAlsnbany@example.com",
+                    FullName = "محمد السنباني",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("MohmdAlsnbany123!", BCrypt.Net.BCrypt.GenerateSalt(12)),
+                    Password= BCrypt.Net.BCrypt.HashPassword("MohmdAlsnbany123!", BCrypt.Net.BCrypt.GenerateSalt(12)),
+                    RoleId = studentRole.Id,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow
+                },
+                new User
+                {
+                    Username = "احمد",
+                    Email = "ahmed@example.com",
+                    FullName = "احمد علي",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("ahmed123!", BCrypt.Net.BCrypt.GenerateSalt(12)),
+                    Password= BCrypt.Net.BCrypt.HashPassword("ahmed123!", BCrypt.Net.BCrypt.GenerateSalt(12)),
                     RoleId = studentRole.Id,
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow
@@ -164,17 +180,47 @@ namespace API.Data
             await context.Users.AddRangeAsync(users);
             await context.SaveChangesAsync();
 
+            // Create Levels
+            var levels = new List<Level>
+            {
+                new Level { LevelName = "First Year", DepartmentId = departments[0].Id, IsActive = true },
+                new Level { LevelName = "Second Year", DepartmentId = departments[0].Id, IsActive = true },
+                new Level { LevelName = "Third Year", DepartmentId = departments[0].Id, IsActive = true },
+                new Level { LevelName = "Fourth Year", DepartmentId = departments[0].Id, IsActive = true },
+                new Level { LevelName = "سنة اولأ ترم أول", DepartmentId = departments[3].Id, IsActive = true },
+                new Level { LevelName = "سنة اولأ ترم ثاني", DepartmentId = departments[3].Id, IsActive = true },
+                new Level { LevelName = "سنة ثانية ترم اول", DepartmentId = departments[3].Id, IsActive = true },
+                new Level { LevelName = "سنة ثانية ترم ثاني", DepartmentId = departments[3].Id, IsActive = true },
+                new Level { LevelName = "سنة ثالثة ترم اول", DepartmentId = departments[3].Id, IsActive = true },
+                new Level { LevelName = "سنة ثالثة ترم ثاني", DepartmentId = departments[3].Id, IsActive = true },
+                new Level { LevelName = "سنة رابعة ترم اول", DepartmentId = departments[3].Id, IsActive = true },
+                new Level { LevelName = "سنة رابعة ترم ثاني", DepartmentId = departments[3].Id, IsActive = true },
+            };
+            await context.Levels.AddRangeAsync(levels);
+            await context.SaveChangesAsync();
+
             // Create Student
             var student = new Student
             {
-                UserId = users.First(u => u.Email == "student@example.com").Id,
-                DepartmentId = departments[0].Id,
-                LevelId = levels[0].Id,
+                UserId = users.First(u => u.Email == "mohmdAlsnbany@example.com").Id,
+                DepartmentId = departments[3].Id,
+                LevelId = levels[4].Id,
                 EnrollmentYear = DateTime.Now.Year,
                 IsActive = true
 
             };
             await context.Students.AddAsync(student);
+            await context.SaveChangesAsync();
+            var student2 = new Student
+            {
+                UserId = users.First(u => u.Email == "ahmed@example.com").Id,
+                DepartmentId = departments[3].Id,
+                LevelId = levels[8].Id,
+                EnrollmentYear = DateTime.Now.Year,
+                IsActive = true
+
+            };
+            await context.Students.AddAsync(student2);
             await context.SaveChangesAsync();
 
             // Create Subjects
@@ -182,7 +228,16 @@ namespace API.Data
             {
                 new Subject { SubjectName = "Programming Fundamentals", Description = "Basic programming concepts", IsActive = true },
                 new Subject { SubjectName = "Data Structures", Description = "Basic data structures", IsActive = true },
-                new Subject { SubjectName = "Database Systems", Description = "Database concepts and SQL", IsActive = true }
+                new Subject { SubjectName = "Database Systems", Description = "Database concepts and SQL Part One", IsActive = true },
+                new Subject { SubjectName = "Database Systems", Description = "Database concepts and SQL Part Tow", IsActive = true },
+                new Subject { SubjectName = "Database Systems", Description = "Database concepts and SQL Part Three", IsActive = true },
+                new Subject { SubjectName = "Database Systems", Description = "Database concepts and SQL Part For", IsActive = true },
+                new Subject { SubjectName = "لغة عربية", Description = "لغة عربية الجزء الأول", IsActive = true },
+                new Subject { SubjectName = "لغة عربية", Description = "لغة عربية الجزء الثاني", IsActive = true },
+                new Subject { SubjectName = "رياضيات", Description = "رياضيات الجزء الأول", IsActive = true },
+                new Subject { SubjectName = "رياضيات", Description = "رياضيات الجزء الثاني", IsActive = true },
+                new Subject { SubjectName = "C# Console", Description = "C# Console commitw", IsActive = true },
+                new Subject { SubjectName = "C# Form", Description = "C# Form Drag-Drop", IsActive = true },
             };
             await context.Subjects.AddRangeAsync(subjects);
             await context.SaveChangesAsync();
@@ -192,7 +247,15 @@ namespace API.Data
             {
                 new Course { CourseName = "CS101", Description = "Introduction to Programming", DepartmentId = departments[0].Id, IsActive = true },
                 new Course { CourseName = "CS102", Description = "Data Structures and Algorithms", DepartmentId = departments[0].Id, IsActive = true },
-                new Course { CourseName = "CS103", Description = "Database Systems", DepartmentId = departments[0].Id, IsActive = true }
+                new Course { CourseName = "CS103", Description = "Database Systems", DepartmentId = departments[0].Id, IsActive = true },
+                new Course { CourseName = "ITFirstYearePart1", Description = "تقنية معلومات سنة اولأ ترم اول", DepartmentId = departments[3].Id, IsActive = true },
+                new Course { CourseName = "ITFirstYearePart2", Description = "تقنية معلومات سنة اولأ ترم ثاني", DepartmentId = departments[3].Id, IsActive = true },
+                new Course { CourseName = "ITSecondYearePart1", Description = "تقنية معلومات سنة ثانية ترم اول", DepartmentId = departments[3].Id, IsActive = true },
+                new Course { CourseName = "ITSecondYearePart2", Description = "تقنية معلومات سنة ثانية ترم ثاني", DepartmentId = departments[3].Id, IsActive = true },
+                new Course { CourseName = "ITTheerdYearePart1", Description = "تقنية معلومات سنة ثالثة ترم اول", DepartmentId = departments[3].Id, IsActive = true },
+                new Course { CourseName = "ITTheerdYearePart2", Description = "تقنية معلومات سنة ثالثة ترم ثاني", DepartmentId = departments[3].Id, IsActive = true },
+                new Course { CourseName = "ITForthYearePart1", Description = "تقنية معلومات سنة رابعة ترم اول", DepartmentId = departments[3].Id, IsActive = true },
+                new Course { CourseName = "ITForthYearePart2", Description = "تقنية معلومات سنة رابعة ترم ثاني", DepartmentId = departments[3].Id, IsActive = true },
             };
             await context.Courses.AddRangeAsync(courses);
             await context.SaveChangesAsync();
@@ -200,9 +263,23 @@ namespace API.Data
             // Create CourseSubjects
             var courseSubjects = new List<CourseSubject>
             {
-                new CourseSubject { CourseId = courses[0].Id, SubjectId = subjects[0].Id, LevelId = levels[0].Id },
+                new CourseSubject { CourseId = courses[0].Id, SubjectId = subjects[0].Id, LevelId = levels[0].Id , },
                 new CourseSubject { CourseId = courses[1].Id, SubjectId = subjects[1].Id, LevelId = levels[1].Id },
-                new CourseSubject { CourseId = courses[2].Id, SubjectId = subjects[2].Id, LevelId = levels[2].Id }
+                new CourseSubject { CourseId = courses[2].Id, SubjectId = subjects[2].Id, LevelId = levels[2].Id },
+                // سنة اولا
+                new CourseSubject { CourseId = courses[3].Id, SubjectId = subjects[6].Id, LevelId = levels[4].Id },
+                new CourseSubject { CourseId = courses[3].Id, SubjectId = subjects[8].Id, LevelId = levels[4].Id },
+                new CourseSubject { CourseId = courses[4].Id, SubjectId = subjects[7].Id, LevelId = levels[5].Id },
+                new CourseSubject { CourseId = courses[4].Id, SubjectId = subjects[9].Id, LevelId = levels[5].Id },
+                // سنة ثانية
+                new CourseSubject { CourseId = courses[5].Id, SubjectId = subjects[10].Id, LevelId = levels[6].Id },
+                new CourseSubject { CourseId = courses[6].Id, SubjectId = subjects[11].Id, LevelId = levels[7].Id },
+                // سنة ثالثة
+                new CourseSubject { CourseId = courses[7].Id, SubjectId = subjects[2].Id, LevelId = levels[8].Id },
+                new CourseSubject { CourseId = courses[8].Id, SubjectId = subjects[3].Id, LevelId = levels[9].Id },
+                // سنة رابعة
+                new CourseSubject { CourseId = courses[9].Id, SubjectId = subjects[4].Id, LevelId = levels[10].Id },
+                new CourseSubject { CourseId = courses[10].Id, SubjectId = subjects[5].Id, LevelId = levels[11].Id },
             };
             await context.CourseSubjects.AddRangeAsync(courseSubjects);
             await context.SaveChangesAsync();
@@ -213,8 +290,16 @@ namespace API.Data
                 new DoctorDepartmentsLevels
                 {
                     Id = 0,
-                    DoctorId = users.First(u => u.Email == "doctor@example.com").Id,
+                    DoctorId = users.First(u => u.Email == "mohdAljodah@example.com").Id,
                     DepartmentId = departments[0].Id,
+                    LevelId = levels[0].Id,
+                    IsActive = true
+                },
+                new DoctorDepartmentsLevels
+                {
+                    Id = 0,
+                    DoctorId = users.First(u => u.Email == "ebrahim@example.com").Id,
+                    DepartmentId = departments[3].Id,
                     LevelId = levels[0].Id,
                     IsActive = true
                 }
@@ -227,10 +312,58 @@ namespace API.Data
             {
                 new LectureSchedule
                 {
-                    CourseSubjectId = courseSubjects[0].Id,
-                    DoctorId = users.First(u => u.Email == "doctor@example.com").Id,
-                    DepartmentId = departments[0].Id,
-                    LevelId = levels[0].Id,
+                    CourseSubjectId = courseSubjects[9].Id,
+                    DoctorId = users.First(u => u.Email == "ebrahim@example.com").Id,
+                    DepartmentId = departments[3].Id,
+                    LevelId = courseSubjects[9].LevelId,
+                    DayOfWeek = DayOfWeek.Monday,
+                    StartTime = new TimeSpan(9, 0, 0),
+                    EndTime = new TimeSpan(10, 30, 0),
+                    Room = "301",
+                    IsActive = true
+                },
+                new LectureSchedule
+                {
+                    CourseSubjectId = courseSubjects[10].Id,
+                    DoctorId = users.First(u => u.Email == "ebrahim@example.com").Id,
+                    DepartmentId = departments[3].Id,
+                    LevelId = courseSubjects[10].LevelId,
+                    DayOfWeek = DayOfWeek.Monday,
+                    StartTime = new TimeSpan(9, 0, 0),
+                    EndTime = new TimeSpan(10, 30, 0),
+                    Room = "302",
+                    IsActive = true
+                },
+                new LectureSchedule
+                {
+                    CourseSubjectId = courseSubjects[11].Id,
+                    DoctorId = users.First(u => u.Email == "ebrahim@example.com").Id,
+                    DepartmentId = departments[3].Id,
+                    LevelId =  courseSubjects[11].LevelId,
+                    DayOfWeek = DayOfWeek.Monday,
+                    StartTime = new TimeSpan(9, 0, 0),
+                    EndTime = new TimeSpan(10, 30, 0),
+                    Room = "401",
+                    IsActive = true
+                },
+                new LectureSchedule
+                {
+                    CourseSubjectId = courseSubjects[12].Id,
+                    DoctorId = users.First(u => u.Email == "ebrahim@example.com").Id,
+                    DepartmentId = departments[3].Id,
+                    LevelId =  courseSubjects[12].LevelId,
+                    DayOfWeek = DayOfWeek.Monday,
+                    StartTime = new TimeSpan(9, 0, 0),
+                    EndTime = new TimeSpan(10, 30, 0),
+                    Room = "402",
+                    IsActive = true
+                },
+                new LectureSchedule
+                {
+                    CourseSubjectId = courseSubjects[3].Id,
+                    DoctorId = users.First(u => u.Email == "mohdAljodah@example.com").Id,
+                    DepartmentId = departments[3].Id,
+                    LevelId = courseSubjects[3].LevelId,
                     DayOfWeek = DayOfWeek.Monday,
                     StartTime = new TimeSpan(9, 0, 0),
                     EndTime = new TimeSpan(10, 30, 0),
@@ -239,10 +372,10 @@ namespace API.Data
                 },
                 new LectureSchedule
                 {
-                    CourseSubjectId = courseSubjects[1].Id,
-                    DoctorId = users.First(u => u.Email == "doctor@example.com").Id,
-                    DepartmentId = departments[0].Id,
-                    LevelId = levels[0].Id,
+                    CourseSubjectId = courseSubjects[4].Id,
+                    DoctorId = users.First(u => u.Email == "mohdAljodah@example.com").Id,
+                    DepartmentId = departments[3].Id,
+                    LevelId =  courseSubjects[4].LevelId,
                     DayOfWeek = DayOfWeek.Monday,
                     StartTime = new TimeSpan(9, 0, 0),
                     EndTime = new TimeSpan(10, 30, 0),
@@ -251,22 +384,10 @@ namespace API.Data
                 },
                 new LectureSchedule
                 {
-                    CourseSubjectId = courseSubjects[2].Id,
-                    DoctorId = users.First(u => u.Email == "doctor@example.com").Id,
-                    DepartmentId = departments[0].Id,
-                    LevelId = levels[0].Id,
-                    DayOfWeek = DayOfWeek.Monday,
-                    StartTime = new TimeSpan(9, 0, 0),
-                    EndTime = new TimeSpan(10, 30, 0),
-                    Room = "103",
-                    IsActive = true
-                },
-                new LectureSchedule
-                {
-                    CourseSubjectId = courseSubjects[0].Id,
-                    DoctorId = users.First(u => u.Email == "doctor@example.com").Id,
-                    DepartmentId = departments[1].Id,
-                    LevelId = levels[0].Id,
+                    CourseSubjectId = courseSubjects[5].Id,
+                    DoctorId = users.First(u => u.Email == "mohdAljodah@example.com").Id,
+                    DepartmentId = departments[3].Id,
+                    LevelId =  courseSubjects[5].LevelId,
                     DayOfWeek = DayOfWeek.Monday,
                     StartTime = new TimeSpan(9, 0, 0),
                     EndTime = new TimeSpan(10, 30, 0),
@@ -275,27 +396,16 @@ namespace API.Data
                 },
                 new LectureSchedule
                 {
-                    CourseSubjectId = courseSubjects[1].Id,
-                    DoctorId = users.First(u => u.Email == "doctor@example.com").Id,
-                    DepartmentId = departments[1].Id,
-                    LevelId = levels[0].Id,
+                    CourseSubjectId = courseSubjects[6].Id,
+                    DoctorId = users.First(u => u.Email == "mohdAljodah@example.com").Id,
+                    DepartmentId = departments[3].Id,
+                    LevelId = courseSubjects[6].LevelId,
                     DayOfWeek = DayOfWeek.Monday,
                     StartTime = new TimeSpan(9, 0, 0),
                     EndTime = new TimeSpan(10, 30, 0),
                     Room = "202",
-                    IsActive = true
-                },
-                new LectureSchedule
-                {
-                    CourseSubjectId = courseSubjects[2].Id,
-                    DoctorId = users.First(u => u.Email == "doctor@example.com").Id,
-                    DepartmentId = departments[1].Id,
-                    LevelId = levels[0].Id,
-                    DayOfWeek = DayOfWeek.Monday,
-                    StartTime = new TimeSpan(9, 0, 0),
-                    EndTime = new TimeSpan(10, 30, 0),
-                    Room = "203",
-                    IsActive = true
+                    IsActive = true,
+                    
                 }
             };
             await context.LectureSchedules.AddRangeAsync(lectureSchedules);
@@ -307,10 +417,19 @@ namespace API.Data
                 new QRCode
                 {
                     QRCodeValue = Guid.NewGuid().ToString(),
+                    ScheduleId = lectureSchedules[4].Id,
+                    DoctorId = users.First(u => u.Email == "ebrahim@example.com").Id,
+                    GeneratedAt = DateTime.Now.AddDays(7),
+                    ExpiresAt = DateTime.Now.AddHours(3),
+                    IsActive = true
+                },
+                new QRCode
+                {
+                    QRCodeValue = Guid.NewGuid().ToString(),
                     ScheduleId = lectureSchedules[0].Id,
-                    DoctorId = users.First(u => u.Email == "doctor@example.com").Id,
+                    DoctorId = users.First(u => u.Email == "mohdAljodah@example.com").Id,
                     GeneratedAt = DateTime.Now,
-                    ExpiresAt = DateTime.Now.AddHours(2),
+                    ExpiresAt = DateTime.Now.AddHours(1),
                     IsActive = true
                 }
             };
@@ -324,6 +443,16 @@ namespace API.Data
                 {
                     StudentId = student.Id,
                     ScheduleId = lectureSchedules[0].Id,
+                    QRCodeId = qrCodes[1].Id,
+                    AttendanceDate = DateTime.Now,
+                    Status = true,  // true for Present
+                    StudentNote = "On time",
+                    DoctorNote = "Present"
+                },
+                new Attendance
+                {
+                    StudentId = student2.Id,
+                    ScheduleId = lectureSchedules[4].Id,
                     QRCodeId = qrCodes[0].Id,
                     AttendanceDate = DateTime.Now,
                     Status = true,  // true for Present

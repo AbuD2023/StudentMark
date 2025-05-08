@@ -1,9 +1,7 @@
+import 'course.dart';
 import 'lecture_schedule.dart';
-import 'package:coordinator_dashpord_for_studentmark/core/models/course.dart';
-import 'package:coordinator_dashpord_for_studentmark/core/models/level.dart'
-    as core;
-import 'package:coordinator_dashpord_for_studentmark/core/models/subject.dart'
-    as core;
+import 'level.dart';
+import 'subject.dart';
 
 class CourseSubject {
   final int id;
@@ -16,8 +14,8 @@ class CourseSubject {
 
   // Navigation properties
   final Course? course;
-  final core.Subject? subject;
-  final core.Level? level;
+  final Subject? subject;
+  final Level? level;
   final List<LectureSchedule>? lectureSchedules;
 
   CourseSubject({
@@ -46,16 +44,14 @@ class CourseSubject {
       //     ? DateTime.parse(json['updatedAt'] as String)
       //     : null,
       course: json['course'] != null ? Course.fromJson(json['course']) : null,
-      subject: json['subject'] != null
-          ? core.Subject.fromJson(json['subject'])
+      subject:
+          json['subject'] != null ? Subject.fromJson(json['subject']) : null,
+      level: json['level'] != null ? Level.fromJson(json['level']) : null,
+      lectureSchedules: json['lectureSchedules'] != null
+          ? (json['lectureSchedules'] as List)
+              .map((e) => LectureSchedule.fromJson(e))
+              .toList()
           : null,
-      level: json['level'] != null ? core.Level.fromJson(json['level']) : null,
-      lectureSchedules:
-          json['lectureSchedules'] != null && (json['attendances'] is List)
-              ? (json['attendances'] as List)
-                  .map((e) => LectureSchedule.fromJson(e))
-                  .toList()
-              : null,
     );
   }
 
@@ -73,5 +69,29 @@ class CourseSubject {
       'level': level?.toJson(),
       'lectureSchedules': lectureSchedules?.map((e) => e.toJson()).toList(),
     };
+  }
+
+  CourseSubject copyWith({
+    int? id,
+    int? courseId,
+    int? subjectId,
+    int? levelId,
+    bool? isActive,
+    Course? course,
+    Subject? subject,
+    Level? level,
+    List<LectureSchedule>? lectureSchedules,
+  }) {
+    return CourseSubject(
+      id: id ?? this.id,
+      courseId: courseId ?? this.courseId,
+      subjectId: subjectId ?? this.subjectId,
+      levelId: levelId ?? this.levelId,
+      isActive: isActive ?? this.isActive,
+      course: course ?? this.course,
+      subject: subject ?? this.subject,
+      level: level ?? this.level,
+      lectureSchedules: lectureSchedules ?? this.lectureSchedules,
+    );
   }
 }

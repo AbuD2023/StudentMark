@@ -57,6 +57,11 @@ namespace API.Services
             var attendances = (await _attendanceRepository.GetAttendancesByStudentAsync(studentId)).ToList();
             return GenerateReport(attendances, $"Student ID: {studentId}");
         }
+        public async Task<AttendanceReportDto> GetAttendancesByDoctorAsync(int studentId)
+        {
+            var attendances = (await _attendanceRepository.GetAttendancesByDoctorAsync(studentId)).ToList();
+            return GenerateReport(attendances, $"Doctor ID: {studentId}");
+        }
 
         public async Task<AttendanceReportDto> GetAttendanceByDepartmentAsync(int departmentId)
         {
@@ -111,17 +116,17 @@ namespace API.Services
                     StudentAttendances = new List<StudentAttendanceDto>()
                 };
             }
-
-            var students = attendances.Select(a => a.Student).Distinct().ToList();
-            var studentAttendances = students.Select(student => new StudentAttendanceDto
-            {
-                StudentId = student.Id,
-                StudentName = student.User.FullName,
-                StudentNumber = student.User.Username,
-                IsPresent = attendances.Any(a => a.StudentId == student.Id && a.Status),
-                AttendanceTime = attendances.FirstOrDefault(a => a.StudentId == student.Id)?.AttendanceDate
-            }).ToList();
-
+            var s = title.Contains("Doctor");
+            if(!s)
+            {var students = attendances.Select(a => a.Student).Distinct().ToList();
+                var studentAttendances = students.Select(student => new StudentAttendanceDto
+                {
+                    StudentId = student.Id,
+                    StudentName = student.User.FullName,
+                    StudentNumber = student.User.Username,
+                    IsPresent = attendances.Any(a => a.StudentId == student.Id && a.Status),
+                    AttendanceTime = attendances.FirstOrDefault(a => a.StudentId == student.Id)?.AttendanceDate
+                }).ToList();
             return new AttendanceReportDto
             {
                 ScheduleId = schedule.Id,
@@ -135,6 +140,35 @@ namespace API.Services
                 AttendancePercentage = students.Count > 0 ? (double)attendances.Count(a => a.Status) / students.Count * 100 : 0,
                 StudentAttendances = studentAttendances
             };
+            }
+            else
+            {
+                
+                    var students = attendances.Select(a => a.Student).Distinct().ToList();
+                    return new AttendanceReportDto
+                    {
+                        ScheduleId = schedule.Id,
+                        CourseName = schedule.CourseSubject.Course.CourseName,
+                        //LevelName = null,
+                        LevelName = schedule.Level.LevelName,
+                        DepartmentName = schedule.Department.DepartmentName,
+                        LectureDate = DateTime.Today.Add(schedule.StartTime), // Convert TimeSpan to DateTime
+                        TotalStudents = attendances.Count(s => s.Student != null),
+                        PresentStudents = attendances.Count(a => a.Status),
+                        AbsentStudents = attendances.Count(s => s.Student != null) - attendances.Count(a => a.Status),
+                        AttendancePercentage = attendances.Count(s => s.Student != null) > 0 ? (double)attendances.Count(a => a.Status) / attendances.Count(s => s.Student != null) * 100 : 0,
+                        StudentAttendances = students.Select(student => new StudentAttendanceDto
+                        {
+                            StudentId = student.Id,
+                            StudentName = student.User.FullName,
+                            StudentNumber = student.User.Username,
+                            IsPresent = attendances.Any(a => a.StudentId == student.Id && a.Status),
+                            AttendanceTime = attendances.FirstOrDefault(a => a.StudentId == student.Id)?.AttendanceDate
+                        }).ToList(),
+
+                    };
+            }
+
         }
     }
 }

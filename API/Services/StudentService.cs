@@ -41,6 +41,11 @@ namespace API.Services
         {
             return await _studentRepository.GetActiveStudentsAsync();
         }
+        
+        public async Task<IEnumerable<Student>> GetAllStudentAsync()
+        {
+            return await _studentRepository.GetAllStudentAsync();
+        }
 
         public async Task<bool> IsEnrollmentYearValidAsync(int enrollmentYear)
         {

@@ -9,6 +9,7 @@ namespace API.Repositories.Interfaces
         Task<IEnumerable<Student>> GetStudentsByLevelAsync(int levelId);
         Task<IEnumerable<Student>> GetStudentsByLevelAndDepartmentAsync(int levelId, int departmentId);
         Task<IEnumerable<Student>> GetActiveStudentsAsync();
+        Task<IEnumerable<Student>> GetAllStudentAsync();
         Task<bool> IsEnrollmentYearValidAsync(int enrollmentYear);
     }
 }

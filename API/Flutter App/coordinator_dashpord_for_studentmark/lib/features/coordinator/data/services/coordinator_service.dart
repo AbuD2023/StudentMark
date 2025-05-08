@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:coordinator_dashpord_for_studentmark/core/models/attendance.dart';
 import 'package:coordinator_dashpord_for_studentmark/core/models/course.dart';
+import 'package:coordinator_dashpord_for_studentmark/core/models/course_subject.dart';
 import 'package:coordinator_dashpord_for_studentmark/core/models/doctor_departments_levels.dart';
 import 'package:coordinator_dashpord_for_studentmark/core/models/lecture_schedule.dart';
 import 'package:coordinator_dashpord_for_studentmark/core/models/level.dart';
@@ -21,8 +22,8 @@ class CoordinatorService {
 
   CoordinatorService(this._dio, {required this.baseUrl}) {
     // _dio.options.baseUrl = baseUrl;
-    _dio.options.connectTimeout = const Duration(seconds: 5);
-    _dio.options.receiveTimeout = const Duration(seconds: 3);
+    _dio.options.connectTimeout = const Duration(seconds: 15);
+    _dio.options.receiveTimeout = const Duration(seconds: 15);
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
         final token = await _storage.read(key: AppConstants.tokenKey);
@@ -50,8 +51,8 @@ class CoordinatorService {
         _dio.get('$baseUrl/api/level'),
         _dio.get('$baseUrl/api/subject'),
         _dio.get('$baseUrl/api/lectureSchedule/active'),
-        // _dio.get('$baseUrl/api/lectureSchedule/active'),
-        // _dio.get('$baseUrl/api/attendance/today'),
+        _dio.get('$baseUrl/api/doctor/attendances/today'),
+        _dio.get('$baseUrl/api/user/doctorUser'),
       ]);
       // responses.forEach(
       //   (element) {
@@ -65,7 +66,10 @@ class CoordinatorService {
       final levels = responses[2].data as List;
       final subjects = responses[3].data as List;
       final activeSchedules = responses[4].data as List;
-      final todayAttendances = responses[4].data as List;
+      final List<Attendance> todayAttendances = (responses[5].data as List)
+          .map((e) => Attendance.fromJson(e))
+          .toList();
+      final totalDoctors = responses[6].data as List;
 
       // Get notifications from active schedules
       final notifications = activeSchedules.map((schedule) {
@@ -74,21 +78,47 @@ class CoordinatorService {
           'message':
               'محاضرة ${schedule['courseSubject']['subject']['subjectName']} في ${schedule['department']['departmentName']}',
           'date': schedule['startTime'],
+          'doctor': totalDoctors.any(
+            (element) =>
+                element['id'].toString() == schedule['doctorId'].toString(),
+          )
+              ? User.fromJson(totalDoctors.firstWhere(
+                  (element) =>
+                      element['id'].toString() ==
+                      schedule['doctorId'].toString(),
+                ))
+              : null,
+          'department': schedule['department'] != null
+              ? Department.fromJson(schedule['department'])
+              : null,
+          'level': schedule['level'] != null
+              ? Level.fromJson(schedule['level'])
+              : null,
           'type': 'room',
+          'room': schedule['room'] ?? 'room'
         };
       }).toList();
-
+      // var totalDoctors;
       // Add attendance notifications
       if (todayAttendances.isNotEmpty) {
         notifications.add({
           'title': 'حضور اليوم',
-          'message': 'تم تسجيل حضور ${todayAttendances.length} طالب اليوم',
-          'date': DateTime.now().toIso8601String(),
+          'message': todayAttendances.isEmpty
+              ? 'لم يسجل أي حضور اليوم'
+              : 'تم تسجيل حضور ${todayAttendances.length} ${todayAttendances.length == 1 ? 'طالب' : 'طلاب'} اليوم',
+          'date': todayAttendances
+              // .where((element) => element['attendanceDate'] != null)
+              .map(
+                (e) => e.attendanceDate.toString(),
+              )
+              .toList(),
+          // 'date': DateTime.now().toIso8601String(),
           'type': 'attendance',
         });
       }
 
       return {
+        'totalDoctors': totalDoctors.length,
         'totalstudents': student.length,
         'totalDepartments': departments.length,
         'totalLevels': levels.length,
@@ -114,7 +144,7 @@ class CoordinatorService {
     }
   }
 
-  Future<List<Student>> getActivestudent() async {
+  Future<List<Student>> getActiveStudent() async {
     try {
       final response = await _dio.get('$baseUrl/api/student/active');
       return (response.data as List)
@@ -399,7 +429,7 @@ class CoordinatorService {
 
   Future<List<Course>> getActiveCourses() async {
     try {
-      final response = await _dio.get('$baseUrl/api/courses/active');
+      final response = await _dio.get('$baseUrl/api/course/active');
       return (response.data as List)
           .map((json) => Course.fromJson(json))
           .toList();
@@ -410,56 +440,123 @@ class CoordinatorService {
 
   Future<Course> getCourseById(int id) async {
     try {
-      final response = await _dio.get('$baseUrl/api/courses/$id');
+      final response = await _dio.get('$baseUrl/api/course/$id');
       return Course.fromJson(response.data);
     } catch (e) {
+      if (e is DioException && e.response?.statusCode == 404) {
+        throw Exception('Course not found');
+      }
       throw Exception('Failed to load course');
     }
   }
 
   Future<Course> getCourseWithSubjects(int id) async {
-    final Response response =
-        await _dio.get('$baseUrl/api/courses/$id/with-subjects');
-    return Course.fromJson(response.data);
+    try {
+      final response = await _dio.get('$baseUrl/api/course/$id/with-subjects');
+      return Course.fromJson(response.data);
+    } catch (e) {
+      if (e is DioException && e.response?.statusCode == 404) {
+        throw Exception('Course not found');
+      }
+      throw Exception('Failed to load course with subjects');
+    }
   }
 
   Future<List<Course>> getCoursesByDepartment(int departmentId) async {
-    final Response response =
-        await _dio.get('$baseUrl/api/courses/department/$departmentId');
-    return (response.data as List)
-        .map((json) => Course.fromJson(json))
-        .toList();
+    try {
+      final response =
+          await _dio.get('$baseUrl/api/course/department/$departmentId');
+      return (response.data as List)
+          .map((json) => Course.fromJson(json))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to load department courses');
+    }
   }
 
   Future<void> createCourse(Course course) async {
     try {
-      await _dio.post('$baseUrl/api/courses', data: course.toJson());
+      final response =
+          await _dio.post('$baseUrl/api/course', data: course.toJson());
+      if (response.statusCode == 201) {
+        return;
+      }
+      throw Exception('Failed to create course');
     } catch (e) {
+      if (e is DioException) {
+        if (e.response?.statusCode == 400) {
+          final message = e.response?.data['message'] as String?;
+          throw Exception(message ?? 'Invalid course data');
+        }
+        if (e.response?.statusCode == 403) {
+          throw Exception('You do not have permission to create courses');
+        }
+      }
       throw Exception('Failed to create course');
     }
   }
 
   Future<void> updateCourse(Course course) async {
     try {
-      await _dio.put('$baseUrl/api/courses/${course.id}',
+      final response = await _dio.put('$baseUrl/api/course/${course.id}',
           data: course.toJson());
+      if (response.statusCode == 204) {
+        return;
+      }
+      throw Exception('Failed to update course');
     } catch (e) {
+      if (e is DioException) {
+        if (e.response?.statusCode == 400) {
+          final message = e.response?.data['message'] as String?;
+          throw Exception(message ?? 'Invalid course data');
+        }
+        if (e.response?.statusCode == 403) {
+          throw Exception('You do not have permission to update courses');
+        }
+        if (e.response?.statusCode == 404) {
+          throw Exception('Course not found');
+        }
+      }
       throw Exception('Failed to update course');
     }
   }
 
   Future<void> deleteCourse(int id) async {
     try {
-      await _dio.delete('$baseUrl/api/courses/$id');
+      final response = await _dio.delete('$baseUrl/api/course/$id');
+      if (response.statusCode == 204) {
+        return;
+      }
+      throw Exception('Failed to delete course');
     } catch (e) {
+      if (e is DioException) {
+        if (e.response?.statusCode == 403) {
+          throw Exception('You do not have permission to delete courses');
+        }
+        if (e.response?.statusCode == 404) {
+          throw Exception('Course not found');
+        }
+      }
       throw Exception('Failed to delete course');
     }
   }
 
   Future<void> toggleCourseStatus(int id) async {
     try {
-      await _dio.put('$baseUrl/api/courses/$id/toggle-status');
+      final response = await _dio.put('$baseUrl/api/course/$id/toggle-status');
+      if (response.statusCode == 204) {
+        return;
+      }
+      throw Exception('Failed to toggle course status');
     } catch (e) {
+      if (e is DioException) {
+        if (e.response?.statusCode == 403) {
+          throw Exception('You do not have permission to toggle course status');
+        }
+        if (e.response?.statusCode == 404) {
+          throw Exception('Course not found');
+        }
+      }
       throw Exception('Failed to toggle course status');
     }
   }
@@ -543,6 +640,22 @@ class CoordinatorService {
         .toList();
   }
 
+  Future<List<User>> getDoctorsUsersAsync() async {
+    final Response response = await _dio.get('$baseUrl/api/user/doctorUser');
+    return (response.data as List).map((json) => User.fromJson(json)).toList();
+  }
+
+  Future<List<User>> getStudentsUsersAsync() async {
+    final Response response = await _dio.get('$baseUrl/api/user/studentUser');
+    return (response.data as List).map((json) => User.fromJson(json)).toList();
+  }
+
+  Future<List<User>> getUnassignedStudentsAsync() async {
+    final Response response =
+        await _dio.get('$baseUrl/api/user/unassigned-students');
+    return (response.data as List).map((json) => User.fromJson(json)).toList();
+  }
+
   Future<List<DoctorDepartmentsLevels>> getActiveDoctorAssignments() async {
     final Response response = await _dio.get('$baseUrl/api/doctors/active');
     return (response.data as List)
@@ -616,6 +729,18 @@ class CoordinatorService {
     }
   }
 
+  Future<List<Map<String, dynamic>>> getAllScheduleRooms() async {
+    try {
+      final response = await _dio.get('$baseUrl/api/lectureSchedule/rooms');
+      // log(response.data.toString(), name: 'response');
+      return (response.data as List)
+          .map((json) => json as Map<String, dynamic>)
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to load lecture schedules');
+    }
+  }
+
   Future<List<LectureSchedule>> getActiveSchedules() async {
     try {
       final response = await _dio.get('$baseUrl/api/lectureSchedule/active');
@@ -627,6 +752,147 @@ class CoordinatorService {
     }
   }
 
+  Future<List<LectureSchedule>> getTodaySchedulesByDoctor(int doctorId) async {
+    try {
+      final response =
+          await _dio.get('$baseUrl/api/lectureSchedule/doctor/$doctorId/today');
+      return (response.data as List)
+          .map((json) => LectureSchedule.fromJson(json))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to load today\'s doctor schedules');
+    }
+  }
+
+  Future<List<LectureSchedule>> getWeekSchedulesByDoctor(int doctorId,
+      {DateTime? startDate}) async {
+    try {
+      final response = await _dio.get(
+        '$baseUrl/api/lectureSchedule/doctor/$doctorId/week',
+        queryParameters: startDate != null
+            ? {'startDate': startDate.toIso8601String()}
+            : null,
+      );
+      return (response.data as List)
+          .map((json) => LectureSchedule.fromJson(json))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to load week doctor schedules');
+    }
+  }
+
+  Future<List<LectureSchedule>> getMonthSchedulesByDoctor(int doctorId,
+      {DateTime? startDate}) async {
+    try {
+      final response = await _dio.get(
+        '$baseUrl/api/lectureSchedule/doctor/$doctorId/month',
+        queryParameters: startDate != null
+            ? {'startDate': startDate.toIso8601String()}
+            : null,
+      );
+      return (response.data as List)
+          .map((json) => LectureSchedule.fromJson(json))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to load month doctor schedules');
+    }
+  }
+
+  Future<List<LectureSchedule>> getFilteredSchedulesByDoctor(
+    int doctorId, {
+    int? departmentId,
+    int? levelId,
+    int? courseSubjectId,
+    int? dayOfWeek,
+  }) async {
+    try {
+      final response = await _dio.get(
+        '$baseUrl/api/lectureSchedule/doctor/$doctorId/filter',
+        queryParameters: {
+          if (departmentId != null) 'departmentId': departmentId,
+          if (levelId != null) 'levelId': levelId,
+          if (courseSubjectId != null) 'courseSubjectId': courseSubjectId,
+          if (dayOfWeek != null) 'dayOfWeek': dayOfWeek,
+        },
+      );
+      return (response.data as List)
+          .map((json) => LectureSchedule.fromJson(json))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to load filtered doctor schedules');
+    }
+  }
+
+  Future<List<LectureSchedule>> getTodaySchedulesByLevel(int levelId) async {
+    try {
+      final response =
+          await _dio.get('$baseUrl/api/lectureSchedule/level/$levelId/today');
+      return (response.data as List)
+          .map((json) => LectureSchedule.fromJson(json))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to load today\'s level schedules');
+    }
+  }
+
+  Future<List<LectureSchedule>> getWeekSchedulesByLevel(int levelId,
+      {DateTime? startDate}) async {
+    try {
+      final response = await _dio.get(
+        '$baseUrl/api/lectureSchedule/level/$levelId/week',
+        queryParameters: startDate != null
+            ? {'startDate': startDate.toIso8601String()}
+            : null,
+      );
+      return (response.data as List)
+          .map((json) => LectureSchedule.fromJson(json))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to load week level schedules');
+    }
+  }
+
+  Future<List<LectureSchedule>> getMonthSchedulesByLevel(int levelId,
+      {DateTime? startDate}) async {
+    try {
+      final response = await _dio.get(
+        '$baseUrl/api/lectureSchedule/level/$levelId/month',
+        queryParameters: startDate != null
+            ? {'startDate': startDate.toIso8601String()}
+            : null,
+      );
+      return (response.data as List)
+          .map((json) => LectureSchedule.fromJson(json))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to load month level schedules');
+    }
+  }
+
+  Future<List<LectureSchedule>> getFilteredSchedulesByLevel(
+    int levelId, {
+    int? departmentId,
+    int? courseSubjectId,
+    int? dayOfWeek,
+  }) async {
+    try {
+      final response = await _dio.get(
+        '$baseUrl/api/lectureSchedule/level/$levelId/filter',
+        queryParameters: {
+          if (departmentId != null) 'departmentId': departmentId,
+          if (courseSubjectId != null) 'courseSubjectId': courseSubjectId,
+          if (dayOfWeek != null) 'dayOfWeek': dayOfWeek,
+        },
+      );
+      return (response.data as List)
+          .map((json) => LectureSchedule.fromJson(json))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to load filtered level schedules');
+    }
+  }
+
+// ... existing code ...
   Future<LectureSchedule> getScheduleById(int id) async {
     try {
       final response = await _dio.get('$baseUrl/api/lectureSchedule/$id');
@@ -690,7 +956,7 @@ class CoordinatorService {
     try {
       await _dio.post('$baseUrl/api/lectureSchedule', data: schedule.toJson());
     } catch (e) {
-      throw Exception('Failed to create lecture schedule');
+      throw Exception(e.toString());
     }
   }
 
@@ -699,7 +965,7 @@ class CoordinatorService {
       await _dio.put('$baseUrl/api/lectureSchedule/${schedule.id}',
           data: schedule.toJson());
     } catch (e) {
-      throw Exception('Failed to update lecture schedule');
+      throw Exception(e.toString());
     }
   }
 
@@ -877,7 +1143,7 @@ class CoordinatorService {
   // User Operations
   Future<List<User>> getAllUsers() async {
     try {
-      final response = await _dio.get('$baseUrl/api/users');
+      final response = await _dio.get('$baseUrl/api/user');
       return (response.data as List)
           .map((json) => User.fromJson(json))
           .toList();
@@ -888,7 +1154,7 @@ class CoordinatorService {
 
   Future<List<User>> getActiveUsers() async {
     try {
-      final response = await _dio.get('$baseUrl/api/users/active');
+      final response = await _dio.get('$baseUrl/api/user/active');
       return (response.data as List)
           .map((json) => User.fromJson(json))
           .toList();
@@ -899,7 +1165,7 @@ class CoordinatorService {
 
   Future<User> getUserById(int id) async {
     try {
-      final response = await _dio.get('$baseUrl/api/users/$id');
+      final response = await _dio.get('$baseUrl/api/user/$id');
       return User.fromJson(response.data);
     } catch (e) {
       throw Exception('Failed to load user');
@@ -908,7 +1174,7 @@ class CoordinatorService {
 
   Future<void> createUser(User user) async {
     try {
-      await _dio.post('$baseUrl/api/users/register', data: {
+      await _dio.post('$baseUrl/api/auth/register', data: {
         'fullName': user.fullName,
         'email': user.email,
         'username': user.username,
@@ -922,7 +1188,7 @@ class CoordinatorService {
 
   Future<void> updateUser(User user) async {
     try {
-      await _dio.put('$baseUrl/api/users/${user.id}', data: {
+      await _dio.put('$baseUrl/api/user/${user.id}', data: {
         'fullName': user.fullName,
         'email': user.email,
         'username': user.username,
@@ -934,9 +1200,102 @@ class CoordinatorService {
 
   Future<void> toggleUserStatus(int id) async {
     try {
-      await _dio.put('$baseUrl/api/users/$id/toggle-status');
+      await _dio.put('$baseUrl/api/user/$id/toggle-status');
     } catch (e) {
       throw Exception('Failed to toggle user status');
+    }
+  }
+
+  Future<void> deleteUser(int id) async {
+    try {
+      await _dio.delete('$baseUrl/api/user/$id');
+    } catch (e) {
+      throw Exception('Failed to Delete user status');
+    }
+  }
+
+  // Course Subject Operations
+  Future<CourseSubject> createCourseSubject(CourseSubject courseSubject) async {
+    try {
+      final response = await _dio.post(
+        '$baseUrl/api/CourseSubject',
+        data: courseSubject.toJson(),
+      );
+
+      if (response.statusCode == 201) {
+        return CourseSubject.fromJson(response.data);
+      } else {
+        throw Exception('Failed to create course subject');
+      }
+    } catch (e) {
+      if (e is DioException) {
+        if (e.response?.statusCode == 400) {
+          final message = e.response?.data['message'] as String?;
+          throw Exception(message ?? 'Invalid course subject data');
+        }
+        if (e.response?.statusCode == 403) {
+          throw Exception(
+              'You do not have permission to create course subjects');
+        }
+      }
+      throw Exception('Failed to create course subject');
+    }
+  }
+
+  Future<void> updateCourseSubject(CourseSubject courseSubject) async {
+    try {
+      final response = await _dio.put(
+        '$baseUrl/api/CourseSubject/${courseSubject.id}',
+        data: {
+          "courseId": courseSubject.courseId,
+          "subjectId": courseSubject.subjectId,
+          "levelId": courseSubject.levelId,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        log(response.data['Message'].toString(),
+            name: 'response CourseSubject=> Message');
+        // return CourseSubject.fromJson(response.data['CourseSubject']);
+      } else {
+        throw Exception('Failed to update course subject');
+      }
+    } catch (e) {
+      if (e is DioException) {
+        if (e.response?.statusCode == 400) {
+          final message = e.response?.data['message'] as String?;
+          throw Exception(message ?? 'Invalid course subject data');
+        }
+        if (e.response?.statusCode == 403) {
+          throw Exception(
+              'You do not have permission to update course subjects');
+        }
+        if (e.response?.statusCode == 404) {
+          throw Exception('Course subject not found');
+        }
+      }
+      throw Exception('Failed to update course subject');
+    }
+  }
+
+  Future<void> deleteCourseSubject(int id) async {
+    try {
+      final response = await _dio.delete('$baseUrl/api/CourseSubject/$id');
+
+      if (response.statusCode != 204) {
+        throw Exception('Failed to delete course subject');
+      }
+    } catch (e) {
+      if (e is DioException) {
+        if (e.response?.statusCode == 403) {
+          throw Exception(
+              'You do not have permission to delete course subjects');
+        }
+        if (e.response?.statusCode == 404) {
+          throw Exception('Course subject not found');
+        }
+      }
+      throw Exception('Failed to delete course subject');
     }
   }
 

@@ -44,10 +44,11 @@ namespace API.Services
             return entities;
         }
 
-        public virtual async Task UpdateAsync(T entity)
+        public virtual async Task/*<T>*/ UpdateAsync(T entity)
         {
             _repository.Update(entity);
             await _unitOfWork.SaveChangesAsync();
+            //return entity;
         }
 
         public virtual async Task DeleteAsync(int id)

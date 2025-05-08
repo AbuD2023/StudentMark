@@ -1,8 +1,11 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:coordinator_dashpord_for_studentmark/core/models/student.dart';
 import 'package:coordinator_dashpord_for_studentmark/features/coordinator/data/services/coordinator_service.dart';
 
 import '../../../../core/models/level.dart';
+import '../../../../core/models/user.dart';
 import '../../../departments/domain/models/department_model.dart';
 
 class StudentsManagementScreen extends StatefulWidget {
@@ -38,7 +41,7 @@ class _StudentsManagementScreenState extends State<StudentsManagementScreen> {
 
     try {
       final students = _showActiveOnly
-          ? await widget.coordinatorService.getActivestudent()
+          ? await widget.coordinatorService.getActiveStudent()
           : await widget.coordinatorService.getAllstudent();
       setState(() {
         _students = students;
@@ -57,22 +60,12 @@ class _StudentsManagementScreenState extends State<StudentsManagementScreen> {
   Future<void> _showAddStudentDialog() async {
     final result = await showDialog<Student>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('إضافة طالب جديد'),
-        content: const AddStudentForm(),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('إلغاء'),
-          ),
-          TextButton(
-            onPressed: () {
-              // TODO: Implement student creation
-              Navigator.pop(context);
-            },
-            child: const Text('حفظ'),
-          ),
-        ],
+      builder: (context) => Dialog(
+        // title: const Text('إضافة طالب جديد'),
+        child: AddStudentForm(
+          coordinatorService: widget.coordinatorService,
+        ),
+        // actions: [],
       ),
     );
 
@@ -109,103 +102,135 @@ class _StudentsManagementScreenState extends State<StudentsManagementScreen> {
     }
   }
 
-  Future<void> _showStudentDetails(Student student) async {
-    try {
-      final detailedStudent =
-          await widget.coordinatorService.getStudentWithUser(student.id!);
-      final attendances =
-          await widget.coordinatorService.getStudentAttendances(student.id!);
-      final schedules =
-          await widget.coordinatorService.getstudentchedules(student.id!);
-
-      if (!mounted) return;
-
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('تفاصيل الطالب'),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('الاسم: ${detailedStudent.user?.fullName}'),
-                Text('البريد الإلكتروني: ${detailedStudent.user?.email}'),
-                Text('القسم: ${detailedStudent.department?.departmentName}'),
-                Text('المستوى: ${detailedStudent.level?.levelName}'),
-                const SizedBox(height: 16),
-                const Text('سجلات الحضور:',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                ...attendances.map((attendance) => ListTile(
-                      title: Text(
-                          '${attendance.lectureSchedule?.courseSubject?.subject?.subjectName}'),
-                      subtitle: Text('${attendance.attendanceDate}'),
-                      trailing: Icon(
-                        attendance.status == true
-                            ? Icons.check_circle
-                            : Icons.cancel,
-                        color: attendance.status == true
-                            ? Colors.green
-                            : Colors.red,
-                      ),
-                    )),
-                const SizedBox(height: 16),
-                const Text('جدول المحاضرات:',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                ...schedules.map((schedule) => ListTile(
-                      title: Text(
-                          '${schedule.courseSubject?.subject?.subjectName}'),
-                      subtitle:
-                          Text('${schedule.startTime} - ${schedule.endTime}'),
-                    )),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('إغلاق'),
-            ),
-          ],
-        ),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('فشل في تحميل تفاصيل الطالب')),
-      );
-    }
-  }
+  // Future<void> _showStudentDetails(Student student) async {
+  //   try {
+  //     final detailedStudent =
+  //         await widget.coordinatorService.getStudentWithUser(student.id!);
+  //     final attendances =
+  //         await widget.coordinatorService.getStudentAttendances(student.id!);
+  //     final schedules =
+  //         await widget.coordinatorService.getstudentchedules(student.id!);
+  //     if (!mounted) return;
+  //     showDialog(
+  //       context: context,
+  //       builder: (context) => AlertDialog(
+  //         title: const Text('تفاصيل الطالب'),
+  //         content: SingleChildScrollView(
+  //           child: Column(
+  //             crossAxisAlignment: CrossAxisAlignment.start,
+  //             mainAxisSize: MainAxisSize.min,
+  //             children: [
+  //               Text('الاسم: ${detailedStudent.user?.fullName}'),
+  //               Text('البريد الإلكتروني: ${detailedStudent.user?.email}'),
+  //               Text('القسم: ${detailedStudent.department?.departmentName}'),
+  //               Text('المستوى: ${detailedStudent.level?.levelName}'),
+  //               const SizedBox(height: 16),
+  //               const Text('سجلات الحضور:',
+  //                   style: TextStyle(fontWeight: FontWeight.bold)),
+  //               ...attendances.map((attendance) => ListTile(
+  //                     title: Text(
+  //                         '${attendance.lectureSchedule?.courseSubject?.subject?.subjectName}'),
+  //                     subtitle: Text('${attendance.attendanceDate}'),
+  //                     trailing: Icon(
+  //                       attendance.status == true
+  //                           ? Icons.check_circle
+  //                           : Icons.cancel,
+  //                       color: attendance.status == true
+  //                           ? Colors.green
+  //                           : Colors.red,
+  //                     ),
+  //                   )),
+  //               const SizedBox(height: 16),
+  //               const Text('جدول المحاضرات:',
+  //                   style: TextStyle(fontWeight: FontWeight.bold)),
+  //               ...schedules.map((schedule) => ListTile(
+  //                     title: Text(
+  //                         '${schedule.courseSubject?.subject?.subjectName}'),
+  //                     subtitle:
+  //                         Text('${schedule.startTime} - ${schedule.endTime}'),
+  //                   )),
+  //             ],
+  //           ),
+  //         ),
+  //         actions: [
+  //           TextButton(
+  //             onPressed: () => Navigator.pop(context),
+  //             child: const Text('إغلاق'),
+  //           ),
+  //         ],
+  //       ),
+  //     );
+  //   } catch (e) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text('فشل في تحميل تفاصيل الطالب')),
+  //     );
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('إدارة الطلاب'),
-        actions: [
-          IconButton(
-            icon:
-                Icon(_showActiveOnly ? Icons.visibility : Icons.visibility_off),
-            onPressed: () {
-              setState(() {
-                _showActiveOnly = !_showActiveOnly;
-              });
-              _loadStudents();
-            },
-            tooltip: _showActiveOnly ? 'عرض الكل' : 'عرض النشطين فقط',
-          ),
-        ],
+    return RefreshIndicator(
+      onRefresh: _loadStudents,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('إدارة الطلاب'),
+          actions: [
+            IconButton(
+              icon: Icon(
+                  _showActiveOnly ? Icons.visibility : Icons.visibility_off),
+              onPressed: () {
+                setState(() {
+                  _showActiveOnly = !_showActiveOnly;
+                });
+                _loadStudents();
+              },
+              tooltip: _showActiveOnly ? 'عرض الكل' : 'عرض النشطين فقط',
+            ),
+          ],
+        ),
+        body: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : _errorMessage != null
+                ? Center(child: Text(_errorMessage!))
+                : _students.isEmpty
+                    ? const Center(child: Text('لا يوجد طلاب'))
+                    : _buildStudentList(),
+        floatingActionButton: FloatingActionButton(
+          onPressed: _showAddStudentDialog,
+          child: const Icon(Icons.add),
+        ),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _errorMessage != null
-              ? Center(child: Text(_errorMessage!))
-              : _students.isEmpty
-                  ? const Center(child: Text('لا يوجد طلاب'))
-                  : _buildStudentList(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showAddStudentDialog,
-        child: const Icon(Icons.add),
+    );
+  }
+
+  Widget _deleteStudent(Student student) {
+    return IconButton(
+      icon: const Icon(
+        Icons.delete,
+        color: Colors.red,
       ),
+      onPressed: () async {
+        try {
+          setState(() {
+            _isLoading = true;
+          });
+          await widget.coordinatorService.deleteStudent(student.id ?? 0);
+          _loadStudents();
+          setState(() {
+            _isLoading = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('تم حذف الطالب بنجاح')));
+        } catch (e) {
+          setState(() {
+            _isLoading = false;
+          });
+          if (mounted)
+            ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('خطأ في الحذف: ${e.toString()}')));
+        }
+      },
+      tooltip: 'حذف',
     );
   }
 
@@ -214,6 +239,7 @@ class _StudentsManagementScreenState extends State<StudentsManagementScreen> {
       itemCount: _students.length,
       itemBuilder: (context, index) {
         final student = _students[index];
+
         return Card(
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: ListTile(
@@ -234,19 +260,27 @@ class _StudentsManagementScreenState extends State<StudentsManagementScreen> {
                   },
                   tooltip: 'عرض سجلات الحضور',
                 ),
+                // IconButton(
+                //   icon: const Icon(Icons.calendar_today),
+                //   onPressed: () => _showStudentDetails(student),
+                //   tooltip: 'عرض سجddلات الحضور',
+                // ),
                 IconButton(
                   icon: Icon(
-                    student.isActive ? Icons.toggle_on : Icons.toggle_off,
-                    color: student.isActive ? Colors.green : Colors.red,
+                    student.isActive == true
+                        ? Icons.toggle_on
+                        : Icons.toggle_off,
+                    color: student.isActive == true ? Colors.green : Colors.red,
                   ),
                   onPressed: () => _toggleStudentStatus(student.id!),
-                  tooltip: student.isActive ? 'تعطيل' : 'تفعيل',
+                  tooltip: student.isActive == true ? 'تعطيل' : 'تفعيل',
                 ),
                 IconButton(
                   icon: const Icon(Icons.edit),
                   onPressed: () => _showEditStudentDialog(student),
                   tooltip: 'تعديل',
                 ),
+                _deleteStudent(student),
               ],
             ),
           ),
@@ -257,7 +291,9 @@ class _StudentsManagementScreenState extends State<StudentsManagementScreen> {
 }
 
 class AddStudentForm extends StatefulWidget {
-  const AddStudentForm({Key? key}) : super(key: key);
+  final CoordinatorService coordinatorService;
+  const AddStudentForm({Key? key, required this.coordinatorService})
+      : super(key: key);
 
   @override
   State<AddStudentForm> createState() => _AddStudentFormState();
@@ -265,20 +301,86 @@ class AddStudentForm extends StatefulWidget {
 
 class _AddStudentFormState extends State<AddStudentForm> {
   final _formKey = GlobalKey<FormState>();
-  final _fullNameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _departmentIdController = TextEditingController();
-  final _levelIdController = TextEditingController();
+  // final _fullNameController = TextEditingController();
+  // final _emailController = TextEditingController();
+  // final _passwordController = TextEditingController();
+  // final _departmentIdController = TextEditingController();
+  // final _levelIdController = TextEditingController();
+  final _enrollmentYearController = TextEditingController();
+  late List<User> _users;
+  late List<Department> _departments;
+  List<Level> _levels = [];
+  bool _isLoading = true;
+  Student _currentStudent = Student();
 
   @override
   void dispose() {
-    _fullNameController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
-    _departmentIdController.dispose();
-    _levelIdController.dispose();
+    _enrollmentYearController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      _users = (await widget.coordinatorService.getUnassignedStudentsAsync());
+      // _users = (await widget.coordinatorService.getStudentsUsersAsync());
+      // getAllUsers())
+      //     .where((element) => element.roleId == 3)
+      //     .toList();
+      await _loadData();
+      if (mounted) {
+        setState(() {});
+      }
+    });
+    super.initState();
+  }
+
+  Future<void> _loadData() async {
+    try {
+      final departments =
+          await widget.coordinatorService.getActiveDepartments();
+
+      setState(() {
+        _departments = departments;
+
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('فشل في تحميل البيانات')),
+      );
+    }
+  }
+
+  Future<void> _loadLevels(int departmentId) async {
+    try {
+      final levels =
+          await widget.coordinatorService.getLevelsByDepartment(departmentId);
+      setState(() {
+        _levels = levels;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('فشل في تحميل المستويات')),
+      );
+    }
+  }
+
+  Student getUpdatedStudent() {
+    return Student(
+      userId: _currentStudent.userId ?? 0,
+      departmentId: _currentStudent.departmentId ?? 0,
+      levelId: _currentStudent.levelId ?? 0,
+      enrollmentYear: int.tryParse(_enrollmentYearController.text) ??
+          _currentStudent.enrollmentYear ??
+          0,
+      isActive: _currentStudent.isActive ?? false,
+    );
   }
 
   @override
@@ -286,72 +388,263 @@ class _AddStudentFormState extends State<AddStudentForm> {
     return Form(
       key: _formKey,
       child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+        child: Stack(
           children: [
-            TextFormField(
-              controller: _fullNameController,
-              decoration: const InputDecoration(
-                labelText: 'الاسم الكامل',
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Text('إضافة طالب من جدول المستخدمين'),
+                  ),
+                  // TextFormField(
+                  //   controller: _fullNameController,
+                  //   decoration: const InputDecoration(
+                  //     labelText: 'الاسم الكامل',
+                  //   ),
+                  //   validator: (value) {
+                  //     if (value == null || value.isEmpty) {
+                  //       return 'الرجاء إدخال الاسم الكامل';
+                  //     }
+                  //     return null;
+                  //   },
+                  // ),
+                  // Padding(
+                  //   padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+                  //   child: TextFormField(
+                  //     controller: _emailController,
+                  //     decoration: const InputDecoration(
+                  //       labelText: 'البريد الإلكتروني',
+                  //     ),
+                  //     validator: (value) {
+                  //       if (value == null || value.isEmpty) {
+                  //         return 'الرجاء إدخال البريد الإلكتروني';
+                  //       }
+                  //       return null;
+                  //     },
+                  //   ),
+                  // ),
+                  // TextFormField(
+                  //   controller: _passwordController,
+                  //   decoration: const InputDecoration(
+                  //     labelText: 'كلمة المرور',
+                  //   ),
+                  //   obscureText: true,
+                  //   validator: (value) {
+                  //     if (value == null || value.isEmpty) {
+                  //       return 'الرجاء إدخال كلمة المرور';
+                  //     }
+                  //     return null;
+                  //   },
+                  // ),
+                  // Padding(
+                  //   padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+                  //   child: TextFormField(
+                  //     controller: _departmentIdController,
+                  //     decoration: const InputDecoration(
+                  //       labelText: 'معرف القسم',
+                  //     ),
+                  //     keyboardType: TextInputType.number,
+                  //     validator: (value) {
+                  //       if (value == null || value.isEmpty) {
+                  //         return 'الرجاء إدخال معرف القسم';
+                  //       }
+                  //       return null;
+                  //     },
+                  //   ),
+                  // ),
+                  // TextFormField(
+                  //   controller: _levelIdController,
+                  //   decoration: const InputDecoration(
+                  //     labelText: 'معرف المستوى',
+                  //   ),
+                  //   keyboardType: TextInputType.number,
+                  //   validator: (value) {
+                  //     if (value == null || value.isEmpty) {
+                  //       return 'الرجاء إدخال معرف المستوى';
+                  //     }
+                  //     return null;
+                  //   },
+                  // ),
+                  if (_isLoading)
+                    const Center(child: CircularProgressIndicator())
+                  else ...[
+                    DropdownButtonFormField<int>(
+                      decoration: const InputDecoration(
+                        labelText: 'اختر الطالب',
+                        border: OutlineInputBorder(),
+                      ),
+                      value: _currentStudent.id,
+                      items: _users.map((user) {
+                        setState(() {
+                          _currentStudent.id = user.student?.id;
+                        });
+                        return DropdownMenuItem<int>(
+                          value: user.id,
+                          child: Text(user.fullName ?? ''),
+                        );
+                      }).toList(),
+                      validator: (value) {
+                        if (value == null) {
+                          return 'الرجاء اختيار الطالب';
+                        }
+                        return null;
+                      },
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() {
+                            _currentStudent.userId = value;
+                          });
+                          _loadLevels(value);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<int>(
+                      decoration: const InputDecoration(
+                        labelText: 'اختر القسم',
+                        border: OutlineInputBorder(),
+                      ),
+                      value: _currentStudent.departmentId,
+                      items: _departments.map((department) {
+                        return DropdownMenuItem<int>(
+                          value: department.id,
+                          child: Text(department.departmentName),
+                        );
+                      }).toList(),
+                      validator: (value) {
+                        if (value == null) {
+                          return 'الرجاء اختيار القسم';
+                        }
+                        return null;
+                      },
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() {
+                            _currentStudent.departmentId = value;
+                          });
+                          _loadLevels(value);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<int>(
+                      decoration: const InputDecoration(
+                        labelText: 'اختر المستوى',
+                        border: OutlineInputBorder(),
+                      ),
+                      value: _currentStudent?.levelId,
+                      items: _levels.map((level) {
+                        return DropdownMenuItem<int>(
+                          value: level.id,
+                          child: Text(level.levelName),
+                        );
+                      }).toList(),
+                      validator: (value) {
+                        if (value == null) {
+                          return 'الرجاء اختيار المستوى';
+                        }
+                        return null;
+                      },
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() {
+                            _currentStudent.levelId = value;
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _enrollmentYearController,
+                      decoration: const InputDecoration(
+                        labelText: 'سنة التسجيل',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'الرجاء إدخال سنة التسجيل';
+                        }
+                        final year = int.tryParse(value);
+                        if (year == null) {
+                          return 'الرجاء إدخال رقم صحيح';
+                        }
+                        if (year < 2000 || year > DateTime.now().year) {
+                          return 'الرجاء إدخال سنة صحيحة';
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('إلغاء'),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          // await widget.coordinatorService.deleteStudent(3);
+                          if (_formKey.currentState!.validate()) {
+                            log(_currentStudent.toJson().toString());
+                            _currentStudent.enrollmentYear =
+                                int.tryParse(_enrollmentYearController.text) ??
+                                    _currentStudent.enrollmentYear ??
+                                    0;
+                            _currentStudent.isActive = true;
+
+                            try {
+                              setState(() {
+                                _isLoading = true;
+                              });
+
+                              await widget.coordinatorService
+                                  .createStudent(_currentStudent);
+                              // await widget.coordinatorService.deleteStudent(3);
+
+                              setState(() {
+                                _isLoading = false;
+                              });
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text('تم إضافة الطالب بنجاح')));
+                            } catch (e) {
+                              setState(() {
+                                _isLoading = false;
+                              });
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content:
+                                          Text('حدث خطأ: ${e.toString()}')));
+                            }
+
+                            Navigator.pop(context, _currentStudent);
+                          }
+                        },
+                        child: const Text('حفظ'),
+                      ),
+                    ],
+                  )
+                ],
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'الرجاء إدخال الاسم الكامل';
-                }
-                return null;
-              },
             ),
-            TextFormField(
-              controller: _emailController,
-              decoration: const InputDecoration(
-                labelText: 'البريد الإلكتروني',
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'الرجاء إدخال البريد الإلكتروني';
-                }
-                return null;
-              },
-            ),
-            TextFormField(
-              controller: _passwordController,
-              decoration: const InputDecoration(
-                labelText: 'كلمة المرور',
-              ),
-              obscureText: true,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'الرجاء إدخال كلمة المرور';
-                }
-                return null;
-              },
-            ),
-            TextFormField(
-              controller: _departmentIdController,
-              decoration: const InputDecoration(
-                labelText: 'معرف القسم',
-              ),
-              keyboardType: TextInputType.number,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'الرجاء إدخال معرف القسم';
-                }
-                return null;
-              },
-            ),
-            TextFormField(
-              controller: _levelIdController,
-              decoration: const InputDecoration(
-                labelText: 'معرف المستوى',
-              ),
-              keyboardType: TextInputType.number,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'الرجاء إدخال معرف المستوى';
-                }
-                return null;
-              },
-            ),
+            if (_isLoading)
+              Positioned(
+                  top: 0,
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    color: const Color.fromARGB(25, 0, 0, 0),
+                    child: const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  ))
           ],
         ),
       ),
@@ -405,7 +698,7 @@ class _EditStudentFormState extends State<EditStudentForm> {
       final departments =
           await widget.coordinatorService.getActiveDepartments();
       final levels = await widget.coordinatorService
-          .getLevelsByDepartment(_currentStudent.departmentId);
+          .getLevelsByDepartment(_currentStudent.departmentId!);
       setState(() {
         _departments = departments;
         _levels = levels;

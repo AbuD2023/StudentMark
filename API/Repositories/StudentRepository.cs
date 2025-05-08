@@ -52,7 +52,16 @@ namespace API.Repositories
                 .Include(s => s.User)
                 .Include(s => s.Department)
                 .Include(s => s.Level)
-                .Where(s => s.User.IsActive)
+                .Where(s => s.IsActive)
+                .ToListAsync();
+        }
+        
+        public async Task<IEnumerable<Student>> GetAllStudentAsync()
+        {
+            return await _dbSet
+                .Include(s => s.User)
+                .Include(s => s.Department)
+                .Include(s => s.Level)
                 .ToListAsync();
         }
 

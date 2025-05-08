@@ -8,5 +8,9 @@ namespace API.Repositories.Interfaces
         Task<bool> IsUsernameUniqueAsync(string username);
         Task<IEnumerable<User>> GetUsersByRoleAsync(int roleId);
         Task<IEnumerable<User>> GetActiveUsersAsync();
+        Task<IEnumerable<User>> GetAllUsersAsync();
+        Task<IEnumerable<User>> GetUsersByRoleIdAsync(int RoleId);
+        //Task<IEnumerable<User>> GetStudentsUsersAsync(int RoleId);
+        Task<IEnumerable<User>> GetUnassignedDoctors();
     }
 }

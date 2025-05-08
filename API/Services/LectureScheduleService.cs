@@ -1,3 +1,4 @@
+using API.DTOs;
 using API.Entities;
 using API.Repositories.Interfaces;
 using API.Services.Interfaces;
@@ -32,6 +33,11 @@ namespace API.Services
             return await _lectureScheduleRepository.GetAllSchedulesAsync();
         }
 
+        public async Task<IEnumerable<RoomDto>> GetAllRoomsAsync()
+        {
+            return await _lectureScheduleRepository.GetAllRoomsAsync();
+        }
+
         public async Task<IEnumerable<LectureSchedule>> GetSchedulesByCourseSubjectAsync(int courseSubjectId)
         {
             return await _lectureScheduleRepository.GetSchedulesByCourseSubjectAsync(courseSubjectId);
@@ -50,6 +56,10 @@ namespace API.Services
         public async Task<IEnumerable<LectureSchedule>> GetActiveSchedulesAsync()
         {
             return await _lectureScheduleRepository.GetActiveSchedulesAsync();
+        }
+        public async Task<IEnumerable<LectureSchedule>> GetSchedulesByDateRangeAsync(DateTime startDate, DateTime endDate)
+        {
+            return await _lectureScheduleRepository.GetSchedulesByDateRangeAsync(DateTime.Now,DateTime.Now);
         }
 
         public async Task<bool> IsTimeSlotAvailableAsync(int doctorId, DayOfWeek dayOfWeek, TimeSpan startTime, TimeSpan endTime)

@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -39,9 +37,19 @@ namespace API.Entities
         [Required]
         public bool IsActive { get; set; } = true;
 
+        public int? CourseId { get; set; }
+
+        public int? SubjectId { get; set; }
+
         // Navigation Properties
         [ForeignKey("CourseSubjectId")]
         public CourseSubject? CourseSubject { get; set; }
+
+        [ForeignKey("SubjectId")]
+        public Subject? Subject { get; set; }
+
+        [ForeignKey("CourseId")]
+        public Course? Course { get; set; }
 
         [ForeignKey("DoctorId")]
         public User? Doctor { get; set; }

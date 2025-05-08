@@ -105,6 +105,18 @@ namespace API.Data
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<LectureSchedule>()
+                .HasOne(l => l.Subject)
+                .WithMany(u => u.LectureSchedules)
+                .HasForeignKey(l => l.SubjectId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<LectureSchedule>()
+                .HasOne(l => l.Course)
+                .WithMany(u => u.LectureSchedules)
+                .HasForeignKey(l => l.CourseId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<LectureSchedule>()
                 .HasOne(l => l.Department)
                 .WithMany(d => d.LectureSchedules)
                 .HasForeignKey(l => l.DepartmentId)
@@ -121,6 +133,18 @@ namespace API.Data
                 .WithMany(cs => cs.LectureSchedules)
                 .HasForeignKey(l => l.CourseSubjectId)
                 .OnDelete(DeleteBehavior.NoAction);
+            
+            //modelBuilder.Entity<LectureSchedule>()
+            //    .HasOne(l => l.Subject)
+            //    .WithMany(cs => cs.LectureSchedules)
+            //    .HasForeignKey(l => l.SubjectId)
+            //    .OnDelete(DeleteBehavior.NoAction);
+
+            //modelBuilder.Entity<LectureSchedule>()
+            //    .HasOne(l => l.Course)
+            //    .WithMany(cs => cs.LectureSchedules)
+            //    .HasForeignKey(l => l.CourseId)
+            //    .OnDelete(DeleteBehavior.NoAction);
 
             // Configure Student relationships
             modelBuilder.Entity<Student>()

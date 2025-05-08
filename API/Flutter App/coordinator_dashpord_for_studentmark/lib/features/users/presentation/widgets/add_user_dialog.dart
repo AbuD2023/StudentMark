@@ -71,13 +71,13 @@ class _AddUserDialogState extends State<AddUserDialog> {
   int _getRoleId(String roleName) {
     switch (roleName) {
       case 'student':
-        return 1;
+        return 3;
       case 'doctor':
         return 2;
       case 'coordinator':
-        return 3;
-      default:
         return 1;
+      default:
+        return 3;
     }
   }
 

@@ -34,6 +34,14 @@ namespace API.Controllers
             return Ok(schedules);
         }
 
+        [HttpGet("rooms")]
+        [Authorize(Roles = "Admin,Coordinator")]
+        public async Task<ActionResult<IEnumerable<RoomDto>>> GetAllRoomsAsync()
+        {
+            var schedules = await _scheduleService.GetAllRoomsAsync();
+            return Ok(schedules);
+        }
+
         [HttpGet("active")]
         [Authorize(Roles = "Admin,Coordinator")]
         public async Task<ActionResult<IEnumerable<LectureSchedule>>> GetActiveSchedules()
@@ -59,13 +67,20 @@ namespace API.Controllers
         public async Task<ActionResult<IEnumerable<LectureSchedule>>> GetSchedulesByDoctor(int doctorId)
         {
             // Check if the requesting user is the doctor or has appropriate role
-            var userId = HttpContext.GetUserId();
-            if (userId != doctorId && !User.IsInRole("Admin") && !User.IsInRole("Coordinator"))
-            {
-                return Forbid();
-            }
+            //var userId = HttpContext.GetUserId();
+            //if (userId != doctorId || (!User.IsInRole("Admin") && !User.IsInRole("Coordinator")))
+            //{
+            //    return Forbid();
+            //}
 
             var schedules = await _scheduleService.GetSchedulesByDoctorAsync(doctorId);
+            return Ok(schedules);
+        }
+        [HttpGet("datenow")]
+        [Authorize(Roles = "Admin,Coordinator,Doctor")]
+        public async Task<ActionResult<IEnumerable<LectureSchedule>>> GetSchedulesByDateRangeAsync()
+        {
+            var schedules = await _scheduleService.GetSchedulesByDateRangeAsync(DateTime.Now, DateTime.Now);
             return Ok(schedules);
         }
 
@@ -163,6 +178,7 @@ namespace API.Controllers
                 DayOfWeek = scheduleDto.DayOfWeek,
                 StartTime = scheduleDto.StartTime,
                 EndTime = scheduleDto.EndTime,
+                Room = scheduleDto.room,
                 IsActive = true
             };
 
@@ -207,6 +223,7 @@ namespace API.Controllers
             schedule.DayOfWeek = scheduleDto.DayOfWeek;
             schedule.StartTime = scheduleDto.StartTime;
             schedule.EndTime = scheduleDto.EndTime;
+            schedule.Room = scheduleDto.room;
 
             await _scheduleService.UpdateAsync(schedule);
             return NoContent();

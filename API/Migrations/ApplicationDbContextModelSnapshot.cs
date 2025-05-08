@@ -67,7 +67,7 @@ namespace API.Migrations
                     b.HasIndex("StudentId", "ScheduleId", "AttendanceDate")
                         .IsUnique();
 
-                    b.ToTable("Attendances");
+                    b.ToTable("Attendances", (string)null);
                 });
 
             modelBuilder.Entity("API.Entities.Course", b =>
@@ -97,7 +97,7 @@ namespace API.Migrations
 
                     b.HasIndex("DepartmentId");
 
-                    b.ToTable("Courses");
+                    b.ToTable("Courses", (string)null);
                 });
 
             modelBuilder.Entity("API.Entities.CourseSubject", b =>
@@ -128,7 +128,7 @@ namespace API.Migrations
 
                     b.HasIndex("SubjectId");
 
-                    b.ToTable("CourseSubjects");
+                    b.ToTable("CourseSubjects", (string)null);
                 });
 
             modelBuilder.Entity("API.Entities.Department", b =>
@@ -153,7 +153,7 @@ namespace API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Departments");
+                    b.ToTable("Departments", (string)null);
                 });
 
             modelBuilder.Entity("API.Entities.DoctorDepartmentsLevels", b =>
@@ -186,7 +186,7 @@ namespace API.Migrations
 
                     b.HasIndex("Id", "DoctorId", "DepartmentId", "LevelId");
 
-                    b.ToTable("DoctorDepartmentsLevels");
+                    b.ToTable("DoctorDepartmentsLevels", (string)null);
                 });
 
             modelBuilder.Entity("API.Entities.LectureSchedule", b =>
@@ -246,7 +246,7 @@ namespace API.Migrations
 
                     b.HasIndex("SubjectId");
 
-                    b.ToTable("LectureSchedules");
+                    b.ToTable("LectureSchedules", (string)null);
                 });
 
             modelBuilder.Entity("API.Entities.Level", b =>
@@ -272,7 +272,7 @@ namespace API.Migrations
 
                     b.HasIndex("DepartmentId");
 
-                    b.ToTable("Levels");
+                    b.ToTable("Levels", (string)null);
                 });
 
             modelBuilder.Entity("API.Entities.Permission", b =>
@@ -300,7 +300,7 @@ namespace API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Permissions");
+                    b.ToTable("Permissions", (string)null);
                 });
 
             modelBuilder.Entity("API.Entities.QRCode", b =>
@@ -339,7 +339,7 @@ namespace API.Migrations
 
                     b.HasIndex("ScheduleId");
 
-                    b.ToTable("QRCodes");
+                    b.ToTable("QRCodes", (string)null);
                 });
 
             modelBuilder.Entity("API.Entities.Role", b =>
@@ -362,7 +362,7 @@ namespace API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Roles");
+                    b.ToTable("Roles", (string)null);
                 });
 
             modelBuilder.Entity("API.Entities.RolePermission", b =>
@@ -380,7 +380,7 @@ namespace API.Migrations
 
                     b.HasIndex("PermissionId");
 
-                    b.ToTable("RolePermissions");
+                    b.ToTable("RolePermissions", (string)null);
                 });
 
             modelBuilder.Entity("API.Entities.Student", b =>
@@ -415,7 +415,7 @@ namespace API.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Students");
+                    b.ToTable("Students", (string)null);
                 });
 
             modelBuilder.Entity("API.Entities.Subject", b =>
@@ -440,7 +440,7 @@ namespace API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Subjects");
+                    b.ToTable("Subjects", (string)null);
                 });
 
             modelBuilder.Entity("API.Entities.User", b =>
@@ -497,7 +497,7 @@ namespace API.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("API.Entities.Attendance", b =>
