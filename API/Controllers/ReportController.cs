@@ -15,17 +15,21 @@ namespace API.Controllers
         private readonly ILectureScheduleService _scheduleService;
         private readonly IStudentService _studentService;
         private readonly IDoctorDepartmentsLevelsService _doctorService;
+        private readonly IUserService _userService;
 
         public ReportController(
             IAttendanceService attendanceService,
             ILectureScheduleService scheduleService,
             IStudentService studentService,
-            IDoctorDepartmentsLevelsService doctorService)
+            IDoctorDepartmentsLevelsService doctorService,
+            IUserService userService)
         {
             _attendanceService = attendanceService;
             _scheduleService = scheduleService;
             _studentService = studentService;
             _doctorService = doctorService;
+            _userService = userService;
+
         }
 
         [HttpPost("attendance")]
@@ -77,7 +81,7 @@ namespace API.Controllers
             if (User.IsInRole("Student"))
             {
                 var userId = HttpContext.GetUserId();
-                var student = await _studentService.GetStudentWithUserAsync(userId);
+                var student = await _studentService.GetStudentWithStudentIdAsync(userId);
                 if (student == null)
                 {
                     return NotFound(new { message = "Student not found" });

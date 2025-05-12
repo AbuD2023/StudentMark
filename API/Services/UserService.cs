@@ -105,6 +105,7 @@ namespace API.Services
                 throw new Exception("Current password is incorrect");
 
             user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
             _userRepository.Update(user);
             await _unitOfWork.SaveChangesAsync();
             return true;
@@ -117,6 +118,7 @@ namespace API.Services
                 throw new Exception("User not found");
 
             user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
             _userRepository.Update(user);
             await _unitOfWork.SaveChangesAsync();
             return true;
@@ -124,7 +126,7 @@ namespace API.Services
 
         public async Task<User> GetByUsernameAsync(string username)
         {
-            return await _context.Users
+            return await _context.Users.Include(u=>u.Role)
                 .FirstOrDefaultAsync(u => u.Username == username);
         }
 
@@ -132,6 +134,12 @@ namespace API.Services
         {
             return await _context.Users
                 .AnyAsync(u => u.Email == email);
+        }
+        
+        public async Task<Student> GetStudentOfUserId(int userId)
+        {
+            return await _context.Students
+                .FirstOrDefaultAsync(u => u.UserId == userId);
         }
 
         public async Task<bool> ValidateTokenAsync(string token)
@@ -174,5 +182,10 @@ namespace API.Services
             // Return doctors that are not assigned to any department/level
             return students.Where(d => !assignedStudentIds.Contains(d.Id))/*.ToList()*/;
         }
+
+        //Task<IEnumerable<Student>> IUserService.GetStudentOfUserId(int UserId)
+        //{
+        //    throw new NotImplementedException();
+        //}
     }
 }

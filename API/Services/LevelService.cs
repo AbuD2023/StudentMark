@@ -27,6 +27,11 @@ namespace API.Services
             return await _levelRepository.GetLevelsByDepartmentAsync(departmentId);
         }
         
+        public async Task<IEnumerable<Level>> GetLevelsByDoctorIdsync(int doctorId)
+        {
+            return await _levelRepository.GetLevelsByDoctorIdsync(doctorId);
+        }
+        
         public async Task<IEnumerable<Level>> GetAllAsyncCopy()
         {
             return await _levelRepository.GetAllAsyncCopy();

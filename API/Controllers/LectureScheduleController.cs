@@ -101,7 +101,7 @@ namespace API.Controllers
         }
 
         [HttpGet("level/{levelId}")]
-        [Authorize(Roles = "Admin,Coordinator")]
+        [Authorize(Roles = "Admin,Coordinator,Student,Doctor")]
         public async Task<ActionResult<IEnumerable<LectureSchedule>>> GetSchedulesByLevel(int levelId)
         {
             var schedules = await _scheduleService.GetSchedulesByLevelAsync(levelId);
@@ -162,6 +162,7 @@ namespace API.Controllers
             // Check if time slot is available for the doctor
             if (!await _scheduleService.IsTimeSlotAvailableAsync(
                 scheduleDto.DoctorId,
+                0,
                 scheduleDto.DayOfWeek,
                 scheduleDto.StartTime,
                 scheduleDto.EndTime))
@@ -208,6 +209,7 @@ namespace API.Controllers
             {
                 if (!await _scheduleService.IsTimeSlotAvailableAsync(
                     scheduleDto.DoctorId,
+                    schedule.Id,
                     scheduleDto.DayOfWeek,
                     scheduleDto.StartTime,
                     scheduleDto.EndTime))
@@ -382,7 +384,7 @@ namespace API.Controllers
         public async Task<IActionResult> GetTodaySchedulesByLevel(int levelId)
         {
             var userId = HttpContext.GetUserId();
-            var student = await _studentService.GetStudentWithUserAsync(userId);
+            var student = await _studentService.GetStudentWithStudentIdAsync(userId);
 
             if (student == null || student.LevelId != levelId)
             {
@@ -402,7 +404,7 @@ namespace API.Controllers
         public async Task<IActionResult> GetWeekSchedulesByLevel(int levelId, [FromQuery] DateTime? startDate)
         {
             var userId = HttpContext.GetUserId();
-            var student = await _studentService.GetStudentWithUserAsync(userId);
+            var student = await _studentService.GetStudentWithStudentIdAsync(userId);
 
             if (student == null || student.LevelId != levelId)
             {
@@ -424,7 +426,7 @@ namespace API.Controllers
         public async Task<IActionResult> GetMonthSchedulesByLevel(int levelId, [FromQuery] DateTime? startDate)
         {
             var userId = HttpContext.GetUserId();
-            var student = await _studentService.GetStudentWithUserAsync(userId);
+            var student = await _studentService.GetStudentWithStudentIdAsync(userId);
 
             if (student == null || student.LevelId != levelId)
             {
@@ -450,7 +452,7 @@ namespace API.Controllers
             [FromQuery] DayOfWeek? dayOfWeek)
         {
             var userId = HttpContext.GetUserId();
-            var student = await _studentService.GetStudentWithUserAsync(userId);
+            var student = await _studentService.GetStudentWithStudentIdAsync(userId);
 
             if (student == null || student.LevelId != levelId)
             {

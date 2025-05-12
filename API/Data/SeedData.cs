@@ -116,7 +116,11 @@ namespace API.Data
                     RoleId = adminRole.Id,
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow,
-                    
+                    Address = "aaa",
+                    Age = 50,
+                    PhoneOne = "7788977",
+                    PhoneTow = "88559999",
+                    Sex = true,
                 },
                 new User
                 {
@@ -127,7 +131,12 @@ namespace API.Data
                     Password= BCrypt.Net.BCrypt.HashPassword("Hifa123!", BCrypt.Net.BCrypt.GenerateSalt(12)),
                     RoleId = adminRole.Id,
                     IsActive = true,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.UtcNow,
+                    Address = "aaa",
+                    Age = 50,
+                    PhoneOne = "7788977",
+                    PhoneTow = "88559999",
+                    Sex = true,
                 },
                
                 new User
@@ -139,8 +148,12 @@ namespace API.Data
                     Password= BCrypt.Net.BCrypt.HashPassword("Ebrahim123!", BCrypt.Net.BCrypt.GenerateSalt(12)),
                     RoleId = doctorRole.Id,
                     IsActive = true,
-                    CreatedAt = DateTime.UtcNow
-
+                    CreatedAt = DateTime.UtcNow,
+                    Address = "aaa",
+                    Age = 50,
+                    PhoneOne = "7788977",
+                    PhoneTow = "88559999",
+                    Sex = true,
                 },
                 new User
                 {
@@ -163,7 +176,12 @@ namespace API.Data
                     Password= BCrypt.Net.BCrypt.HashPassword("MohmdAlsnbany123!", BCrypt.Net.BCrypt.GenerateSalt(12)),
                     RoleId = studentRole.Id,
                     IsActive = true,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.UtcNow,
+                    Address = "aaa",
+                    Age = 50,
+                    PhoneOne = "7788977",
+                    PhoneTow = "88559999",
+                    Sex = true,
                 },
                 new User
                 {
@@ -174,7 +192,12 @@ namespace API.Data
                     Password= BCrypt.Net.BCrypt.HashPassword("ahmed123!", BCrypt.Net.BCrypt.GenerateSalt(12)),
                     RoleId = studentRole.Id,
                     IsActive = true,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.UtcNow,
+                    Address = "aaa",
+                    Age = 50,
+                    PhoneOne = "7788977",
+                    PhoneTow = "88559999",
+                    Sex = true,
                 }
             };
             await context.Users.AddRangeAsync(users);
@@ -206,7 +229,8 @@ namespace API.Data
                 DepartmentId = departments[3].Id,
                 LevelId = levels[4].Id,
                 EnrollmentYear = DateTime.Now.Year,
-                IsActive = true
+                IsActive = true,
+                AcademicId = DateTime.Now.Year.ToString() + "|" + users.First(u => u.Email == "mohmdAlsnbany@example.com").Id.ToString(),
 
             };
             await context.Students.AddAsync(student);
@@ -217,7 +241,8 @@ namespace API.Data
                 DepartmentId = departments[3].Id,
                 LevelId = levels[8].Id,
                 EnrollmentYear = DateTime.Now.Year,
-                IsActive = true
+                IsActive = true,
+                AcademicId = DateTime.Now.Year.ToString() + "|" + users.First(u => u.Email == "ahmed@example.com").Id.ToString(),
 
             };
             await context.Students.AddAsync(student2);

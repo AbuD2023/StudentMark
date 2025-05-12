@@ -7,6 +7,7 @@ namespace API.Services.Interfaces
         Task<User> GetUserWithRoleAsync(string username);
         Task<bool> IsUsernameUniqueAsync(string username);
         Task<IEnumerable<User>> GetUsersByRoleAsync(int roleId);
+        Task<Student> GetStudentOfUserId(int UserId);
         Task<IEnumerable<User>> GetActiveUsersAsync();
         Task<IEnumerable<User>> GetAllUsersAsync();
         Task<bool> UpdateUserStatusAsync(int userId);

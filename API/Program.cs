@@ -108,9 +108,9 @@ internal class Program
         builder.Services.AddAuthorization(options =>
         {
             options.AddPolicy("RequireAdminRole", policy => policy.RequireClaim(ClaimTypes.Role, "1"));
-            options.AddPolicy("RequireCoordinatorRole", policy => policy.RequireClaim(ClaimTypes.Role, "2"));
-            options.AddPolicy("RequireDoctorRole", policy => policy.RequireClaim(ClaimTypes.Role, "3"));
-            options.AddPolicy("RequireStudentRole", policy => policy.RequireClaim(ClaimTypes.Role, "4"));
+            options.AddPolicy("RequireDoctorRole", policy => policy.RequireClaim(ClaimTypes.Role, "2"));
+            options.AddPolicy("RequireStudentRole", policy => policy.RequireClaim(ClaimTypes.Role, "3"));
+            options.AddPolicy("RequireCoordinatorRole", policy => policy.RequireClaim(ClaimTypes.Role, "4"));
         });
 
         var app = builder.Build();
@@ -131,11 +131,11 @@ internal class Program
         }
 
         // Configure the HTTP request pipeline.
-        if (app.Environment.IsDevelopment())
-        {
+        //if (app.Environment.IsDevelopment())
+        //{
             app.UseSwagger();
             app.UseSwaggerUI();
-        }
+        //}
 
         app.UseHttpsRedirection();
 

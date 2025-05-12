@@ -11,13 +11,22 @@ namespace API.Repositories
         {
         }
 
-        public async Task<Student?> GetStudentWithUserAsync(int studentId)
+        public async Task<Student?> GetStudentWithStudentIdAsync(int studentId)
         {
             return await _dbSet
                 .Include(s => s.User)
                 .Include(s => s.Department)
                 .Include(s => s.Level)
                 .FirstOrDefaultAsync(s => s.Id == studentId);
+        }
+        
+        public async Task<Student?> GetStudentWithUserIdAsync(int userId)
+        {
+            return await _dbSet
+                //.Include(s => s.User)
+                //.Include(s => s.Department)
+                //.Include(s => s.Level)
+                .Where(s => s.UserId == userId).FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<Student>> GetStudentsByDepartmentAsync(int departmentId)
@@ -65,9 +74,19 @@ namespace API.Repositories
                 .ToListAsync();
         }
 
-        public async Task<bool> IsEnrollmentYearValidAsync(int enrollmentYear)
+        public Task<bool> IsEnrollmentYearValidAsync(int enrollmentYear)
         {
-            return enrollmentYear >= DateTime.Now.Year - 4 && enrollmentYear <= DateTime.Now.Year;
+            return Task.FromResult(enrollmentYear >= DateTime.Now.Year - 4 && enrollmentYear <= DateTime.Now.Year);
+        }
+        
+        public async Task<bool> IsAcademicIdValidAsync(string AcademicId)
+        {
+          Student? student = await _dbSet.Where(st => st.AcademicId == AcademicId).FirstOrDefaultAsync();
+            if(student == null)
+            {
+                return false;
+            }
+            return true;
         }
     }
 }

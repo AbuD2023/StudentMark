@@ -24,6 +24,11 @@ namespace API.Repositories
         {
             return await _dbSet.Where(l => l.DepartmentId == departmentId).Include(l=> l.Department).ToListAsync();
         }
+        
+        public async Task<IEnumerable<Level>> GetLevelsByDoctorIdsync(int doctorId)
+        {
+            return await _dbSet.Include(l=> l.Department).Include(l=> l.LectureSchedules).Where(l =>  l.LectureSchedules.Any(d => d.DoctorId == doctorId)).ToListAsync();
+        }
 
         public async Task<IEnumerable<Level>> GetActiveLevelsAsync()
         {

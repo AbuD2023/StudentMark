@@ -16,5 +16,7 @@ namespace API.DTOs
         [Required]
         [Range(2000, 2100)]
         public int EnrollmentYear { get; set; }
+
+        public string? AcademicId { get; set; }
     }
 }

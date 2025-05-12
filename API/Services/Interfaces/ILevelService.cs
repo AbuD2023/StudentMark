@@ -5,6 +5,7 @@ namespace API.Services.Interfaces
     public interface ILevelService : IGenericService<Level>
     {
         Task<IEnumerable<Level>> GetLevelsByDepartmentAsync(int departmentId);
+        Task<IEnumerable<Level>> GetLevelsByDoctorIdsync(int doctorId);
         Task<IEnumerable<Level>> GetActiveLevelsAsync();
         Task<IEnumerable<Level>> GetAllAsyncCopy();
         Task<bool> IsLevelNameUniqueInDepartmentAsync(string levelName, int departmentId);

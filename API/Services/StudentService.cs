@@ -22,9 +22,13 @@ namespace API.Services
             _lectureScheduleRepository = lectureScheduleRepository;
         }
 
-        public async Task<Student?> GetStudentWithUserAsync(int studentId)
+        public async Task<Student?> GetStudentWithStudentIdAsync(int studentId)
         {
-            return await _studentRepository.GetStudentWithUserAsync(studentId);
+            return await _studentRepository.GetStudentWithStudentIdAsync(studentId);
+        }
+        public async Task<Student?> GetStudentWithUserIdAsync(int userId)
+        {
+            return await _studentRepository.GetStudentWithStudentIdAsync(userId);
         }
 
         public async Task<IEnumerable<Student>> GetStudentsByDepartmentAsync(int departmentId)
@@ -51,6 +55,11 @@ namespace API.Services
         {
             return await _studentRepository.IsEnrollmentYearValidAsync(enrollmentYear);
         }
+        
+        public async Task<bool> IsAcademicIdValidAsync(string AcademicId)
+        {
+            return await _studentRepository.IsAcademicIdValidAsync(AcademicId);
+        }
 
         public async Task<IEnumerable<Attendance>> GetStudentAttendancesAsync(int studentId)
         {
@@ -59,7 +68,7 @@ namespace API.Services
 
         public async Task<IEnumerable<LectureSchedule>> GetStudentSchedulesAsync(int studentId)
         {
-            var student = await _studentRepository.GetStudentWithUserAsync(studentId);
+            var student = await _studentRepository.GetStudentWithStudentIdAsync(studentId);
             if (student == null)
                 return Enumerable.Empty<LectureSchedule>();
 

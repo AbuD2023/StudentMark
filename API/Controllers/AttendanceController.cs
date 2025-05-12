@@ -45,14 +45,14 @@ namespace API.Controllers
             }
 
             var userId = HttpContext.GetUserId();
-            var student = await _studentService.GetStudentWithUserAsync(userId);
+            var student = await _studentService.GetStudentWithStudentIdAsync(userId);
             if (student == null)
             {
                 return BadRequest(new { message = "Student not found" });
             }
 
             // التحقق من صحة رمز QR
-            var qrCode = await _qrCodeService.GetByIdAsync(attendanceDto.QRCodeId);
+            var qrCode = await _qrCodeService.GetQRCodeByValueAsync(attendanceDto.QRCodeValue);
             if (qrCode == null)
             {
                 return BadRequest(new { message = "Invalid QR code" });
@@ -105,7 +105,7 @@ namespace API.Controllers
         public async Task<IActionResult> GetAttendanceStatus(int studentId)
         {
             var userId = HttpContext.GetUserId();
-            var student = await _studentService.GetStudentWithUserAsync(userId);
+            var student = await _studentService.GetStudentWithStudentIdAsync(userId);
             if (student == null || student.Id != studentId)
             {
                 return Forbid();
@@ -126,11 +126,12 @@ namespace API.Controllers
         }
 
         [HttpGet("student/{studentId}")]
-        [Authorize(Roles = "Student")]
+        //[Authorize(Roles = "Student")]
+        [Authorize(Roles = "Admin,Coordinator,Student")]
         public async Task<IActionResult> GetStudentAttendances(int studentId)
         {
-            var userId = HttpContext.GetUserId();
-            var student = await _studentService.GetStudentWithUserAsync(userId);
+            //var userId = HttpContext.GetUserId();
+            var student = await _studentService.GetStudentWithStudentIdAsync(studentId);
             if (student == null || student.Id != studentId)
             {
                 return Forbid();
@@ -145,7 +146,7 @@ namespace API.Controllers
         public async Task<IActionResult> GetAttendanceByCourse(int studentId, int courseId)
         {
             var userId = HttpContext.GetUserId();
-            var student = await _studentService.GetStudentWithUserAsync(userId);
+            var student = await _studentService.GetStudentWithStudentIdAsync(userId);
             if (student == null || student.Id != studentId)
             {
                 return Forbid();
@@ -184,7 +185,7 @@ namespace API.Controllers
         public async Task<IActionResult> GetAttendanceByDoctor(int studentId, int doctorId)
         {
             var userId = HttpContext.GetUserId();
-            var student = await _studentService.GetStudentWithUserAsync(userId);
+            var student = await _studentService.GetStudentWithStudentIdAsync(userId);
             if (student == null || student.Id != studentId)
             {
                 return Forbid();
@@ -223,7 +224,7 @@ namespace API.Controllers
         public async Task<IActionResult> GetAttendanceReport(int studentId, [FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)
         {
             var userId = HttpContext.GetUserId();
-            var student = await _studentService.GetStudentWithUserAsync(userId);
+            var student = await _studentService.GetStudentWithStudentIdAsync(userId);
             if (student == null || student.Id != studentId)
             {
                 return Forbid();
@@ -275,7 +276,7 @@ namespace API.Controllers
         public async Task<IActionResult> GetAttendancesByTodayAsync()
         {
             var userId = HttpContext.GetUserId();
-            var student = await _studentService.GetStudentWithUserAsync(userId);
+            var student = await _studentService.GetStudentWithStudentIdAsync(userId);
             if (student == null )
             {
                 return Forbid();

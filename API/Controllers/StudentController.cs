@@ -36,7 +36,7 @@ namespace API.Controllers
         }
 
         [HttpGet("{id}")]
-        [Authorize(Roles = "Admin,Coordinator")]
+        [Authorize(Roles = "Admin,Coordinator,Student")]
         public async Task<ActionResult<Student>> GetStudent(int id)
         {
             var student = await _studentService.GetByIdAsync(id);
@@ -48,10 +48,10 @@ namespace API.Controllers
         }
 
         [HttpGet("{id}/with-user")]
-        [Authorize(Roles = "Admin,Coordinator")]
+        [Authorize(Roles = "Admin,Coordinator,Student")]
         public async Task<ActionResult<Student>> GetStudentWithUser(int id)
         {
-            var student = await _studentService.GetStudentWithUserAsync(id);
+            var student = await _studentService.GetStudentWithStudentIdAsync(id);
             if (student == null)
             {
                 return NotFound(new { message = "Student not found" });
@@ -89,7 +89,7 @@ namespace API.Controllers
         {
             // Check if the requesting user is the student or has appropriate role
             var userId = HttpContext.GetUserId();
-            var student = await _studentService.GetStudentWithUserAsync(id);
+            var student = await _studentService.GetStudentWithStudentIdAsync(id);
 
             if (student == null)
             {
@@ -128,7 +128,8 @@ namespace API.Controllers
                 DepartmentId = studentDto.DepartmentId,
                 LevelId = studentDto.LevelId,
                 EnrollmentYear = studentDto.EnrollmentYear,
-                IsActive = true
+                IsActive = true,
+                AcademicId = studentDto.AcademicId
             };
 
             await _studentService.AddRangeAsync([student]);
@@ -155,11 +156,17 @@ namespace API.Controllers
             {
                 return BadRequest(new { message = "Invalid enrollment year" });
             }
+            
+            if (!await _studentService.IsAcademicIdValidAsync(studentDto.AcademicId))
+            {
+                return BadRequest(new { message = "Invalid Academic Id" });
+            }
 
             student.UserId = studentDto.UserId;
             student.DepartmentId = studentDto.DepartmentId;
             student.LevelId = studentDto.LevelId;
             student.EnrollmentYear = studentDto.EnrollmentYear;
+            student.AcademicId = studentDto.AcademicId;
 
             await _studentService.UpdateAsync(student);
             return Ok(student);

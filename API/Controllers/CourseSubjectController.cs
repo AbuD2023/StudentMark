@@ -25,6 +25,13 @@ namespace API.Controllers
             var courseSubjects = await _courseSubjectService.GetCourseSubjectsByCourseAsync(courseId);
             return Ok(courseSubjects);
         }
+        
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<CourseSubject>>> GetCourseSubjects()
+        {
+            var courseSubjects = await _courseSubjectService.GetAllAsync();
+            return Ok(courseSubjects);
+        }
 
         [HttpGet("subject/{subjectId}")]
         public async Task<ActionResult<IEnumerable<CourseSubject>>> GetCourseSubjectsBySubject(int subjectId)

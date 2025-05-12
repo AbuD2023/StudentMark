@@ -62,9 +62,9 @@ namespace API.Services
             return await _lectureScheduleRepository.GetSchedulesByDateRangeAsync(DateTime.Now,DateTime.Now);
         }
 
-        public async Task<bool> IsTimeSlotAvailableAsync(int doctorId, DayOfWeek dayOfWeek, TimeSpan startTime, TimeSpan endTime)
+        public async Task<bool> IsTimeSlotAvailableAsync(int doctorId, int LectureScheduleId, DayOfWeek dayOfWeek, TimeSpan startTime, TimeSpan endTime)
         {
-            return await _lectureScheduleRepository.IsTimeSlotAvailableAsync(doctorId, dayOfWeek, startTime, endTime);
+            return await _lectureScheduleRepository.IsTimeSlotAvailableAsync(doctorId, LectureScheduleId, dayOfWeek, startTime, endTime);
         }
 
         public async Task<IEnumerable<QRCode>> GetScheduleQRCodesAsync(int scheduleId)

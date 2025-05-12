@@ -156,19 +156,27 @@ namespace API.Controllers
         [Authorize(Roles = "Admin,Coordinator")]
         public async Task<IActionResult> UpdateUserStatusAsync(int id)
         {
-            //return Task.FromResult<IActionResult>(Ok(users));
-
             var user = await _userService.GetByIdAsync(id);
             if (user == null)
             {
                 return NotFound(new { message = "User not found" });
             }
-
-            //user.IsActive = !user.IsActive;
-            //await _userService.UpdateUserStatusAsync(user.Id, !user.IsActive);
-            //var users =  _userService.UpdateAsync(user);
+            
             await  _userService.UpdateUserStatusAsync(id);
             return NoContent();
+        }
+        
+        [HttpPut("{id}/change-password")]
+        [Authorize(Roles = "Admin,Coordinator,Student,Doctor")]
+        public async Task<IActionResult> ChangePassword(int id,[FromBody] ChangePassword changePassword)
+        {
+
+            var user = await _userService.ChangePasswordAsync(id, changePassword.CurrentPassword, changePassword.NewPassword);
+            if (user == false)
+            {
+                return Ok(new { message = "User not found" });
+            }
+            return Ok(new { message = true });
         }
         
         [HttpGet("active")]
@@ -215,4 +223,10 @@ namespace API.Controllers
             }
         }
     }
+   public class ChangePassword
+    {
+        public required string CurrentPassword { get; set; }
+        public required string NewPassword { get; set; }
+    }
 }
+

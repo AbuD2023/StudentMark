@@ -12,7 +12,7 @@ namespace API.Services.Interfaces
         Task<IEnumerable<LectureSchedule>> GetActiveSchedulesAsync();
         Task<IEnumerable<LectureSchedule>> GetAllSchedulesAsync();
         Task<IEnumerable<LectureSchedule>> GetSchedulesByDateRangeAsync(DateTime startDate, DateTime endDate);
-        Task<bool> IsTimeSlotAvailableAsync(int doctorId, DayOfWeek dayOfWeek, TimeSpan startTime, TimeSpan endTime);
+        Task<bool> IsTimeSlotAvailableAsync(int doctorId, int LectureScheduleId, DayOfWeek dayOfWeek, TimeSpan startTime, TimeSpan endTime);
         Task<IEnumerable<QRCode>> GetScheduleQRCodesAsync(int scheduleId);
         Task<IEnumerable<RoomDto>> GetAllRoomsAsync();
         Task<IEnumerable<Attendance>> GetScheduleAttendancesAsync(int scheduleId);

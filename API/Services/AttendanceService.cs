@@ -58,7 +58,7 @@ namespace API.Services
             if (qrCode == null || !qrCode.IsActive || qrCode.ExpiresAt < DateTime.UtcNow)
                 return false;
 
-            var student = await _studentRepository.GetStudentWithUserAsync(studentId);
+            var student = await _studentRepository.GetStudentWithStudentIdAsync(studentId);
             if (student == null || !student.User.IsActive)
                 return false;
 

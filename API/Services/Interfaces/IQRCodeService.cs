@@ -9,6 +9,7 @@ namespace API.Services.Interfaces
         Task<IEnumerable<QRCode>> GetActiveQRCodesAsync();
         Task<IEnumerable<QRCode>> GetExpiredQRCodesAsync();
         Task<QRCode> GetActiveQRCodeByScheduleAsync(int scheduleId);
+        Task<QRCode?> GetQRCodeByValueAsync(string qrCodeValue);
         Task<QRCode> GenerateQRCodeAsync(int scheduleId, int doctorId, TimeSpan expiryTime);
         Task<QRCode> UpdateAsync(QRCode qrCode);
         Task<QRCode> CancelQRCodeAsync(int id);

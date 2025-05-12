@@ -1,5 +1,6 @@
-using API.DTOs.Auth;
+﻿using API.DTOs.Auth;
 using API.Entities;
+using API.Services;
 using API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,13 +14,17 @@ namespace API.Controllers
     {
         private readonly IUserService _userService;
         private readonly IConfiguration _configuration;
+        private readonly IStudentService _studentService;
+        private readonly IRoleService _roleService;
         private readonly IDoctorDepartmentsLevelsService _doctorDepartmentsLevelsService;
 
-        public AuthController(IUserService userService, IConfiguration configuration, IDoctorDepartmentsLevelsService doctorDepartmentsLevelsService)
+        public AuthController(IUserService userService, IConfiguration configuration, IDoctorDepartmentsLevelsService doctorDepartmentsLevelsService, IStudentService studentService, IRoleService roleService)
         {
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             _doctorDepartmentsLevelsService = doctorDepartmentsLevelsService ?? throw new ArgumentNullException(nameof(doctorDepartmentsLevelsService));
+            _studentService = studentService;
+            _roleService = roleService;
         }
 
         [HttpPost("register")]
@@ -105,7 +110,74 @@ namespace API.Controllers
                     return BadRequest(new { message = "Account is deactivated" });
                 }
 
+                var role = await _roleService.GetRoleWithPermissionsAsync(user.RoleId);
+                var doctor = await _doctorDepartmentsLevelsService.GetByDoctorAsync(user.Id);
+                var student = await _userService.GetStudentOfUserId(user.Id);
+
+                if (role == null)
+                {
+                    return BadRequest(new { message = "لا يوجد لديك اي صلاحية لاستخدام التطبيق" });
+                }
+
                 var token = GenerateJwtToken(user);
+
+                if (role.Name == "Admin")
+                {
+                    return Ok(new
+                    {
+                        token,
+                        user = new
+                        {
+                            user.Id,
+                            user.Username,
+                            user.Email,
+                            user.FullName,
+                            user.RoleId,
+                            user.IsActive,
+                        },
+                      roleName = user.Role.Name,
+
+                    });
+                }
+
+                if (role.Name == "Doctor")
+                {
+                   
+                    return Ok(new
+                    {
+                        token,
+                        user = new
+                        {
+                            user.Id,
+                            user.Username,
+                            user.Email,
+                            user.FullName,
+                            user.RoleId,
+                            user.IsActive,
+                        },
+                        doctor,
+                        roleName = user.Role.Name,
+                    });
+                }
+
+                if (role.Name == "Student")
+                {
+                    return Ok(new
+                    {
+                        token,
+                        user = new
+                        {
+                            user.Id,
+                            user.Username,
+                            user.Email,
+                            user.FullName,
+                            user.RoleId,
+                            user.IsActive,
+                        },
+                        student,
+                        roleName = user.Role.Name,
+                    });
+                }
 
                 return Ok(new
                 {
@@ -117,9 +189,11 @@ namespace API.Controllers
                         user.Email,
                         user.FullName,
                         user.RoleId,
-                        user.IsActive
-                    }
+                        user.IsActive,
+                    },
+                    roleName = user.Role.Name,
                 });
+
             }
             catch (Exception ex)
             {
@@ -133,9 +207,9 @@ namespace API.Controllers
             string roleName = user.RoleId switch
             {
                 1 => "Admin",
-                2 => "Coordinator",
-                3 => "Doctor",
-                4 => "Student",
+                2 => "Doctor",
+                3 => "Student",
+                4 => "Coordinator",
                 _ => "Unknown"
             };
 

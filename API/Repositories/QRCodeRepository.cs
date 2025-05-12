@@ -15,12 +15,12 @@ namespace API.Repositories
         {
             return await _dbSet
                 .Include(q => q.Doctor)
-                .Include(q => q.LectureSchedule)
-                    .ThenInclude(ls => ls.CourseSubject)
-                        .ThenInclude(cs => cs.Course)
-                .Include(q => q.LectureSchedule)
-                    .ThenInclude(ls => ls.CourseSubject)
-                        .ThenInclude(cs => cs.Subject)
+                //.Include(q => q.LectureSchedule)
+                //    .ThenInclude(ls => ls.CourseSubject)
+                //        .ThenInclude(cs => cs.Course)
+                //.Include(q => q.LectureSchedule)
+                //    .ThenInclude(ls => ls.CourseSubject)
+                //        .ThenInclude(cs => cs.Subject)
                 .FirstOrDefaultAsync(q => q.QRCodeValue == qrCodeValue);
         }
 

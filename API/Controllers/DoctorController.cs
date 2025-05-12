@@ -15,12 +15,13 @@ namespace API.Controllers
     {
         private readonly IDoctorDepartmentsLevelsService _doctorService;
         private readonly IAttendanceService _attendanceService;
+        private readonly ILevelService _levelService;
 
-        public DoctorController(IDoctorDepartmentsLevelsService doctorService, IAttendanceService attendanceService)
+        public DoctorController(IDoctorDepartmentsLevelsService doctorService, IAttendanceService attendanceService, ILevelService levelService)
         {
             _doctorService = doctorService;
             _attendanceService = attendanceService;
-
+            _levelService = levelService;
         }
 
         [HttpGet]
@@ -39,6 +40,18 @@ namespace API.Controllers
             return Ok(assignments);
         }
 
+        [HttpGet("{userId}/levels")]
+        [Authorize(Roles = "Admin,Coordinator,Doctor")]
+        public async Task<ActionResult<Level>> GetLevelsByDoctorIdsync(int userId)
+        {
+            var assignment = await _levelService.GetLevelsByDoctorIdsync(userId);
+            if (assignment == null)
+            {
+                return NotFound(new { message = "Doctor assignment not found" });
+            }
+            return Ok(assignment);
+        }
+        
         [HttpGet("{id}")]
         [Authorize(Roles = "Admin,Coordinator")]
         public async Task<ActionResult<DoctorDepartmentsLevels>> GetDoctorAssignment(int id)

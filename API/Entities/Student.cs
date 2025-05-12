@@ -23,6 +23,8 @@ namespace API.Entities
         [Required]
         public int EnrollmentYear { get; set; }
 
+        public string? AcademicId { get; set; }
+
         [Required]
         public bool IsActive { get; set; } = true;
 

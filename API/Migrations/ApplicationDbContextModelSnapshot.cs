@@ -391,6 +391,9 @@ namespace API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("AcademicId")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("DepartmentId")
                         .HasColumnType("int");
 
