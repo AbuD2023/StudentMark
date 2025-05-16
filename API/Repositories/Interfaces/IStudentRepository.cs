@@ -6,6 +6,7 @@ namespace API.Repositories.Interfaces
     {
         Task<Student?> GetStudentWithStudentIdAsync(int studentId);
         Task<Student?> GetStudentWithUserIdAsync(int userId);
+        Task<bool> StudentIsActive(int userId);
         Task<IEnumerable<Student>> GetStudentsByDepartmentAsync(int departmentId);
         Task<IEnumerable<Student>> GetStudentsByLevelAsync(int levelId);
         Task<IEnumerable<Student>> GetStudentsByLevelAndDepartmentAsync(int levelId, int departmentId);

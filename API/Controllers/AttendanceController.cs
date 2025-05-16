@@ -45,10 +45,21 @@ namespace API.Controllers
             }
 
             var userId = HttpContext.GetUserId();
-            var student = await _studentService.GetStudentWithStudentIdAsync(userId);
+            var student = await _studentService.GetStudentWithUserIdAsync(userId);
             if (student == null)
             {
-                return BadRequest(new { message = "Student not found" });
+                //student = await _studentService.GetStudentWithUserIdAsync(userId);
+
+                //if (student == null)
+                //{
+                    return BadRequest(new { message = "Student not found" });
+                //}
+            }
+
+            bool studentIsActive = await _studentService.StudentIsActive(userId);
+            if (!studentIsActive)
+            {
+                return BadRequest(new { message = "Student is not Active" });
             }
 
             // التحقق من صحة رمز QR

@@ -23,10 +23,19 @@ namespace API.Repositories
         public async Task<Student?> GetStudentWithUserIdAsync(int userId)
         {
             return await _dbSet
-                //.Include(s => s.User)
-                //.Include(s => s.Department)
-                //.Include(s => s.Level)
                 .Where(s => s.UserId == userId).FirstOrDefaultAsync();
+        }
+        
+        public async Task<bool> StudentIsActive(int userId)
+        {
+            Student? student = await _dbSet
+                .Where(s => s.UserId == userId && s.IsActive).FirstOrDefaultAsync();
+
+            if (student == null)
+            {
+                return false;
+            }
+            return true;
         }
 
         public async Task<IEnumerable<Student>> GetStudentsByDepartmentAsync(int departmentId)

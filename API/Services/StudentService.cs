@@ -30,6 +30,11 @@ namespace API.Services
         {
             return await _studentRepository.GetStudentWithStudentIdAsync(userId);
         }
+        
+        public async Task<bool> StudentIsActive(int userId)
+        {
+            return await _studentRepository.StudentIsActive(userId);
+        }
 
         public async Task<IEnumerable<Student>> GetStudentsByDepartmentAsync(int departmentId)
         {

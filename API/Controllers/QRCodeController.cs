@@ -26,22 +26,25 @@ namespace API.Controllers
         }
 
         [HttpPost("generate")]
-        [Authorize(Roles = "Admin,Coordinator,Doctor")]
+        [Authorize(Roles = "Doctor")]
+        //[Authorize(Roles = "Admin,Coordinator,Doctor")]
         public async Task<IActionResult> GenerateQRCode([FromBody] QRCodeGenerateDto qrCodeDto)
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return BadRequest(new { message = "Schedule not found or not assigned to this doctor", modelState = ModelState });
             }
 
             // التحقق من أن الطبيب يطلب إنشاء رمز QR لمحاضرته
-            if (User.IsInRole("Doctor"))
-            {
+            //if (User.IsInRole("Doctor"))
+            //{
                 var userId = HttpContext.GetUserId();
                 var doctorAssignments = await _doctorService.GetByDoctorAsync(userId);
+
                 if (!doctorAssignments.Any() || doctorAssignments.First().DoctorId != qrCodeDto.DoctorId)
                 {
-                    return Forbid();
+                    return BadRequest(ModelState);
+                    //return Forbid();
                 }
 
                 // التحقق من أن المحاضرة تنتمي للطبيب
@@ -50,6 +53,24 @@ namespace API.Controllers
                 {
                     return BadRequest(new { message = "Schedule not found or not assigned to this doctor" });
                 }
+            
+            if ( !(DateTime.Now.TimeOfDay >= schedule.StartTime &&  DateTime.Now.TimeOfDay <= schedule.EndTime))
+                {
+                    return BadRequest(new { message = "لا يمكنك إنشاء الباركود بعد إنتهاء وقت المحاضرة" });
+                }
+            if ( !(DateTime.Now.DayOfWeek == schedule.DayOfWeek) )
+                {
+                    return BadRequest(new { message = "لا يمكنك إنشاء الباركود الا في اليوم الخاص بالمحاضرة" });
+                }
+            //}
+
+            //var userId = HttpContext.GetUserId();
+
+            var scheduleByDoctor = await _scheduleService.GetByIdAsync(qrCodeDto.ScheduleId);
+
+            if (scheduleByDoctor == null || scheduleByDoctor.DoctorId != userId)
+            {
+                return BadRequest(new { message = "Schedule not found or not assigned to this doctor" });
             }
 
             // التحقق من عدم وجود رمز QR نشط لنفس المحاضرة
